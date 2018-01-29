@@ -92,7 +92,7 @@ public class GraphView extends View {
         canvas.drawText(title, (graphwidth / 2) + horstart, border - 4, paint);
 
         if (max != min) {
-            paint.setColor(Color.GREEN);
+            paint.setColor(Color.BLUE);//GREEN
 
             if (type == BAR) {
                 float datalength = values.length;
@@ -113,7 +113,7 @@ public class GraphView extends View {
                     float rat = val / diff;
                     float h = graphheight * rat;
                     if (i > 0)
-                        paint.setColor(Color.GREEN);
+                        paint.setColor(Color.BLUE);//GREEN
                     paint.setStrokeWidth(2.0f);
 
                     canvas.drawLine(((i - 1) * colwidth) + (horstart + 1) + halfcol, (border - lasth) + graphheight, (i * colwidth) + (horstart + 1) + halfcol, (border - h) + graphheight, paint);
