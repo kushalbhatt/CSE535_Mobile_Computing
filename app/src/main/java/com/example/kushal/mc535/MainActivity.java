@@ -12,18 +12,24 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-
-import java.util.Random;
+import java.lang.*;
+import android.content.*;
+import android.os.Handler;
+import java.util.*;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener
 {
     //Create these global variables to be accesses between methods within the MainActivity class.
+    private int linearray=10;
     private String horLabels[] = {"2700","2750","2800","2850","2900","2950","3000","3050","3100"," "};;
-    private String verLabels[] = {" ","2000","1500","1000","500"};
+    private String verLabels[] = {" ","2000","1500","1000","500","0"};
     private GraphView ecg;
-    private float values[]=new float[10];
+    private float values[]=new float[linearray];
     private RelativeLayout main_view;
     private Button run, stop;
+    private Handler handler = new Handler();
+    private Timer timer;
+    private TimerTask timerTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -43,8 +49,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         //Give the ECG line its values for the initial application View.
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < linearray; i++)
+        {
             values[i] = 0;
+        }
         //Change the application view.
         changeView();
     }
@@ -82,29 +90,48 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(view.getId()==R.id.run)
         {
             Toast.makeText(this, "Running it!", Toast.LENGTH_SHORT).show();
-            //Give the ECG line it's random values within the maximum and minimum constraints.
-            Random random = new Random();
-            for (int i = 0; i < 10; i++)
-                values[i] = (random.nextFloat() * 10000) % 2500;
-            //Change the view with the new values of the line.
-            changeView();
+            //To stop timer
+            Runnable runnable = new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    running();
+                    handler.postDelayed(this, 1000);
+                }
+            };
+            handler.postDelayed(runnable, 1000);
         }
         //When the stop button is pressed, the following statement runs.
         else
         {
+            Toast.makeText(this,"Stopping it!",Toast.LENGTH_SHORT).show();
+            /*
             //Remove the previous view.
             //main_view.removeView(ecg);
             main_view.removeAllViews();
             initView();
-            Toast.makeText(this,"Stopping it!",Toast.LENGTH_SHORT).show();
             //Give the ECG line zero values to fulfill the GraphView input requirements.
             for (int i = 0; i < 10; i++)
                 values[i] = 0;
             //Change the view with the new values of the line.
             changeView();
+            */
         }
     }
 
+    public void running()
+    {
+        final Random random = new Random();
+        /*for(int j=linearray-1;j>0;j--)
+        {
+            values[j-1]=values[j];
+        }*/
+        values[3] = (random.nextFloat() * 10000) % 2500;
+        main_view.removeAllViews();
+        initView();
+        changeView();
+    }
     //Initializes the blank graph view.
     public void initView()
     {
