@@ -20,13 +20,20 @@ import java.util.*;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener
 {
     //Create these global variables to be accesses between methods within the MainActivity class.
-    private int linearray=10;
+    private int num_array_elems = 100;
     private String horLabels[] = {"2700","2750","2800","2850","2900","2950","3000","3050","3100"," "};;
     private String verLabels[] = {" ","2000","1500","1000","500","0"};
     private GraphView ecg;
-    private float values[]=new float[linearray];
+    private float values[]=new float[num_array_elems];
     private RelativeLayout main_view;
-    private Button run, stop;
+
+
+    private Button run_button_var, stop_button_var;
+
+    // Status flag for pausing
+    private boolean pause_flag  = false;
+
+
     private Handler handler = new Handler();
     private Timer timer;
     private TimerTask timerTask;
@@ -35,7 +42,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        //Initialize the view.
+
+         //Initialize the view.
         initView();
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener()
@@ -49,10 +57,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         //Give the ECG line its values for the initial application View.
-        for (int i = 0; i < linearray; i++)
-        {
-            values[i] = 0;
-        }
+        for (int i = 0; i < num_array_elems; i++)
+            values[i] = 0; // Initialize the value array to zeros
+
         //Change the application view.
         changeView();
     }
@@ -86,61 +93,68 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view)
     {
-        //When the run button is pressed, the following if statement runs.
-        if(view.getId()==R.id.run)
+        // Use switch statement to determine which button was clicked
+        switch(view.getId()) {
+            case R.id.run_button:
+                Toast.makeText(this, "Run button pressed", Toast.LENGTH_SHORT).show();
+                pause_flag = false;
+                break;
+            case R.id.stop_button:
+                Toast.makeText(this, "Pause button pressed", Toast.LENGTH_SHORT).show();
+                pause_flag = true;
+                break;
+        }
+
+        // Buggy part
+        Runnable runnable = new Runnable()
         {
-            Toast.makeText(this, "Running it!", Toast.LENGTH_SHORT).show();
-            //To stop timer
-            Runnable runnable = new Runnable()
+            @Override
+            public void run()
             {
-                @Override
-                public void run()
-                {
-                    running();
-                    handler.postDelayed(this, 1000);
-                }
-            };
-            handler.postDelayed(runnable, 1000);
-        }
-        //When the stop button is pressed, the following statement runs.
-        else
-        {
-            Toast.makeText(this,"Stopping it!",Toast.LENGTH_SHORT).show();
-            /*
-            //Remove the previous view.
-            //main_view.removeView(ecg);
-            main_view.removeAllViews();
-            initView();
-            //Give the ECG line zero values to fulfill the GraphView input requirements.
-            for (int i = 0; i < 10; i++)
-                values[i] = 0;
-            //Change the view with the new values of the line.
-            changeView();
-            */
-        }
+                running(pause_flag);
+                handler.postDelayed(this, 750);
+            }
+        };
+        handler.postDelayed(runnable, 750);
+
     }
 
-    public void running()
+    public void running(boolean pause_flag)
     {
-        final Random random = new Random();
-        /*for(int j=linearray-1;j>0;j--)
+        // Check to see if pause_flag has been set, if not, then draw graph
+        if (pause_flag == false)
         {
-            values[j-1]=values[j];
-        }*/
-        values[3] = (random.nextFloat() * 10000) % 2500;
-        main_view.removeAllViews();
-        initView();
-        changeView();
+            Random randVal = new Random();
+            float step_size = 0.1f;
+            float lower_x_bound = -1;
+            float x = lower_x_bound;
+            for (int i = 0; i < num_array_elems; ++i) {
+
+                int number = randVal.nextInt(10);
+                float noise = ((float)number) / 2.0f;
+
+                x += step_size;
+                values[i] = (float) Math.sin(x) + noise;
+            }
+
+            //main_view.removeAllViews();
+            initView();
+            changeView();
+        }
     }
     //Initializes the blank graph view.
     public void initView()
     {
         setContentView(R.layout.activity_main);
         main_view=findViewById(R.id.main_content);
-        run = findViewById(R.id.run);
-        stop = findViewById(R.id.stop);
-        run.setOnClickListener(this);
-        stop.setOnClickListener(this);
+
+        // Assign buttons to variables
+        run_button_var = (Button)findViewById(R.id.run_button);
+        stop_button_var = (Button)findViewById(R.id.stop_button);
+
+        // Set on-click listeners to buttons (described here: https://www.youtube.com/watch?v=GtxVILjLcw8K)
+        run_button_var.setOnClickListener(this);
+        stop_button_var.setOnClickListener(this);
     }
 
     public void changeView()

@@ -95,7 +95,7 @@
     </RadioGroup>
 
     <Button
-        android:id="@+id/run"
+        android:id="@+id/run_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/sex"
@@ -104,12 +104,12 @@
         android:backgroundTint="@android:color/holo_green_light"/>
 
     <Button
-        android:id="@+id/stop"
+        android:id="@+id/stop_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignStart="@+id/nameText"
-        android:layout_alignTop="@+id/run"
+        android:layout_alignTop="@+id/run_button"
+        android:backgroundTint="@android:color/holo_red_dark"
         android:text="Stop"
-        android:textColor="@android:color/white"
-        android:backgroundTint="@android:color/holo_red_dark"/>
+        android:textColor="@android:color/white" />
 </RelativeLayout>
