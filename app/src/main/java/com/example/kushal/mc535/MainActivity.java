@@ -45,7 +45,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
          //Initialize the view.
         initView();
-        FloatingActionButton fab = findViewById(R.id.fab);
+
+        //why do we need floating button? --Kushal
+        /*FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -55,13 +57,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .setAction("Action", null).show();
             }
         });
+        */
 
         //Give the ECG line its values for the initial application View.
         for (int i = 0; i < num_array_elems; i++)
             values[i] = 0; // Initialize the value array to zeros
 
-        //Change the application view.
-        changeView();
+        //add Graphview to MainView.
+        inflateGraphView();
     }
 
     @Override
@@ -100,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 pause_flag = false;
                 break;
             case R.id.stop_button:
-                Toast.makeText(this, "Pause button pressed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Stop button pressed", Toast.LENGTH_SHORT).show();
                 pause_flag = true;
                 break;
         }
@@ -122,8 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void running(boolean pause_flag)
     {
         // Check to see if pause_flag has been set, if not, then draw graph
-        if (pause_flag == false)
-        {
+        if (pause_flag == false) {
             Random randVal = new Random();
             float step_size = 0.1f;
             float lower_x_bound = -1;
@@ -131,16 +133,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             for (int i = 0; i < num_array_elems; ++i) {
 
                 int number = randVal.nextInt(10);
-                float noise = ((float)number) / 2.0f;
+                float noise = ((float) number) / 2.0f;
 
                 x += step_size;
                 values[i] = (float) Math.sin(x) + noise;
             }
-
-            //main_view.removeAllViews();
-            initView();
-            changeView();
         }
+        else
+        {
+            //main_view.removeAllViews();
+            //This is not good. Don't inflate views again and again unless there's no other solution available.
+            //initView();
+            //changeView();
+
+            /***
+             A possible alternative -- Kushal
+             set values to null and then refresh the custom view
+             so that the graph will be cleared
+             ***/
+            values = new float[num_array_elems];
+        }
+
+        ecg.setValues(values);
+        ecg.invalidate();
     }
     //Initializes the blank graph view.
     public void initView()
@@ -157,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         stop_button_var.setOnClickListener(this);
     }
 
-    public void changeView()
+    public void inflateGraphView()
     {
         //Initialize GraphView.
         ecg = new GraphView(this,values,"Test ECG",horLabels,verLabels,GraphView.LINE);

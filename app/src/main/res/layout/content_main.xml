@@ -22,7 +22,7 @@
         android:layout_below="@+id/ID"
         android:ems="5"
         android:inputType="textPersonName"
-        android:text="ID" />
+        android:hint="ID" />
 
     <EditText
         android:id="@+id/ageText"
@@ -33,7 +33,7 @@
         android:layout_toRightOf="@id/idText"
         android:ems="5"
         android:inputType="number"
-        android:text="Name" />
+        android:hint="Age"/>
 
     <TextView
         android:id="@+id/age"
@@ -61,7 +61,7 @@
         android:layout_alignTop="@+id/ageText"
         android:ems="5"
         android:inputType="textPersonName"
-        android:text="Name" />
+        android:hint="Name"/>
 
     <TextView
         android:id="@+id/sex"
