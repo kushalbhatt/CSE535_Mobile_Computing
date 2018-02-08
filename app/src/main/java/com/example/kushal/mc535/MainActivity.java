@@ -48,21 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Initialize the view.
         initView();
-
-        //why do we need floating button? --Kushal
-        /*FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        */
-
-        //Give the ECG line its values for the initial application View.
+ //Give the ECG line its values for the initial application View.
 //        for (int i = 0; i < num_array_elems; i++)
 //            values[i] = 0; // Initialize the value array to zeros
 //
@@ -118,20 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 runCount = 0;
                 break;
         }
-
-        // Buggy part
-//        Runnable runnable = new Runnable()
-//        {
-//            @Override
-//            public void run()
-//            {
-//                running(pause_flag);
-//                handler.postDelayed(this, 750);
-//            }
-//        };
-//        handler.postDelayed(runnable, 750);
         running(pause_flag);
-
     }
 
     public void running(boolean pause_flag) {
@@ -169,9 +142,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (pause_flag) {
             mSeries1.resetData(new DataPoint[0]);
             mHandler.removeCallbacks(mTimer1);
+            generateData();
         } else {
             if (runCount == 1) {
-                super.onResume();
+                //super.onResume();
                 mTimer1 = new Runnable() {
                     @Override
                     public void run() {
@@ -242,6 +216,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //
 //    }
 
+
+    @Override
+    public void onResume() {
+        if(pause_flag==false)
+            mHandler.postDelayed(mTimer1, 300);
+        super.onResume();
+    }
 
     @Override
     public void onPause() {
