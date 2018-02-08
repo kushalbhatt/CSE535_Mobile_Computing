@@ -112,4 +112,10 @@
         android:backgroundTint="@android:color/holo_red_dark"
         android:text="Stop"
         android:textColor="@android:color/white" />
+    <com.jjoe64.graphview.GraphView
+        android:layout_width="match_parent"
+        android:layout_height="200dip"
+        android:id="@+id/graph"
+        android:layout_below="@+id/rg1"
+        android:layout_marginTop="15dp"/>
 </RelativeLayout>

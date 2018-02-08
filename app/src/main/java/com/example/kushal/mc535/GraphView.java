@@ -1,10 +1,10 @@
 package com.example.kushal.mc535;
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.view.View;
+        import android.content.Context;
+        import android.graphics.Canvas;
+        import android.graphics.Color;
+        import android.graphics.Paint;
+        import android.graphics.Paint.Align;
+        import android.view.View;
 
 /**
  * GraphView creates a scaled line or bar graph with x and y axis labels.
@@ -64,7 +64,6 @@ public class GraphView extends View {
 
 
         paint.setTextAlign(Align.LEFT);
-        paint.setTextSize(20);
         int vers = verlabels.length - 1;
         for (int i = 0; i < verlabels.length; i++) {
             paint.setColor(Color.DKGRAY);
@@ -88,15 +87,17 @@ public class GraphView extends View {
         }
 
         paint.setTextAlign(Align.CENTER);
-        paint.setTextSize(20);
         canvas.drawText(title, (graphwidth / 2) + horstart, border - 4, paint);
 
         if (max != min) {
-            paint.setColor(Color.BLUE);//GREEN
-
+            paint.setColor(Color.LTGRAY);
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(Color.RED);
+            paint.setAntiAlias(true);
             if (type == BAR) {
                 float datalength = values.length;
                 float colwidth = (width - (2 * border)) / datalength;
+
                 for (int i = 0; i < values.length; i++) {
                     float val = values[i] - min;
                     float rat = val / diff;
@@ -113,7 +114,7 @@ public class GraphView extends View {
                     float rat = val / diff;
                     float h = graphheight * rat;
                     if (i > 0)
-                        paint.setColor(Color.BLUE);//GREEN
+                        paint.setColor(Color.GREEN);
                     paint.setStrokeWidth(2.0f);
 
                     canvas.drawLine(((i - 1) * colwidth) + (horstart + 1) + halfcol, (border - lasth) + graphheight, (i * colwidth) + (horstart + 1) + halfcol, (border - h) + graphheight, paint);
@@ -134,7 +135,6 @@ public class GraphView extends View {
     }
 
     private float getMin() {
-
         float smallest = Integer.MAX_VALUE;
         for (int i = 0; i < values.length; i++)
             if (values[i] < smallest)
