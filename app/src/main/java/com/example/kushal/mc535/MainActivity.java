@@ -59,6 +59,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mSeries1.setColor(Color.GREEN);
         graph.addSeries(mSeries1);
         graph.getViewport().setBackgroundColor(Color.BLACK);
+        graph.setTitle("ECG");
+        graph.setTitleColor(Color.BLUE);
+        graph.setTitleTextSize(50);
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getViewport().setMinX(0);
         graph.getViewport().setMinY(0);
@@ -104,6 +107,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 runCount = 0;
                 break;
         }
+
+        // Buggy part
+//        Runnable runnable = new Runnable()
+//        {
+//            @Override
+//            public void run()
+//            {
+//                running(pause_flag);
+//                handler.postDelayed(this, 750);
+//            }
+//        };
+//        handler.postDelayed(runnable, 750);
         running(pause_flag);
     }
 
@@ -142,7 +157,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (pause_flag) {
             mSeries1.resetData(new DataPoint[0]);
             mHandler.removeCallbacks(mTimer1);
-            generateData();
         } else {
             if (runCount == 1) {
                 //super.onResume();
