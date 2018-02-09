@@ -1,7 +1,11 @@
-This is assignment 1.
+Group 17 Assignment 1 Information:
 
-Group 17
-Kushal Bhatt
-Rachel Dedinsky
-Joshua Holloway
-Ashni Modi
+Youtube Link: https://youtu.be/Gz-NtISXoqA
+
+Github Link: https://github.com/kushalbhatt/CSE535
+
+Group Member          Email                 Student ID
+Kushal Bhatt          kvbhatt1@asu.edu      1211206721
+Rachel Dedinsky       rdedinsk@asu.edu      1208572075
+Joshua Holloway       jhollow6@asu.edu
+Ashni Modi            asmodi@asu.edu
