@@ -1,14 +1,23 @@
 package com.example.kushal.mc535;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -18,7 +27,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, SensorEventListener {
     //Create these global variables to be accesses between methods within the MainActivity class.
     private final Handler mHandler = new Handler();
     private Runnable mTimer1;
@@ -27,12 +36,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public int runCount = 0;
 
     Button run_button_var, stop_button_var;
-
+    private TextView debugText;
     // Status flag for pausing
     private boolean pause_flag = false;
     public ArrayList<DataPoint> lastPlotted = new ArrayList<DataPoint>();
     public DataPoint[] temp = new DataPoint[30];
 
+    private DatabaseHelper dbHelper;
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+    private int sensor_sampling_rate = 1000000;  // 1 sec
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +68,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         graph.getViewport().setMinY(0);
         graph.getViewport().setMaxX(30);
         graph.getViewport().setMaxY(100);
+
+        //initialize the db helper
+        dbHelper = new DatabaseHelper(this);
+
+        //get sensor status and register for updates
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        if(accelerometer==null)
+        {
+            //oops
+           Toast.makeText(this,"Accelerometer is not available!",Toast.LENGTH_LONG);
+           // AlertDialog can also be shown -- Optional
+        }
     }
 
     @Override
@@ -85,29 +112,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Use switch statement to determine which button was clicked
         switch (view.getId()) {
             case R.id.run_button:
-                Toast.makeText(this, "Run button pressed", Toast.LENGTH_SHORT).show();
                 pause_flag = false;
                 runCount++;
+                /*
+                    fetch patient data
+                */
+                String patient_name = ((EditText)findViewById(R.id.nameText)).getText().toString();
+                String patient_id = ((EditText)findViewById(R.id.idText)).getText().toString();
+                String patient_age = ((EditText)findViewById(R.id.ageText)).getText().toString();
+                String sex = "Male";
+                int checked = ((RadioGroup)findViewById(R.id.rg1)).getCheckedRadioButtonId();
+                if (checked == R.id.female)
+                    sex = "Female";
+
+                /*
+                    Create table if not already for this patient so that we can dump data into it
+                 */
+                //input sanity check to avoid errors
+                if(!patient_age.isEmpty() && !patient_name.isEmpty() && !patient_id.isEmpty()) {
+                    dbHelper.createPatientTable(patient_name + "_" + patient_id + "_" + patient_age + "_" + sex);
+                    running(pause_flag);
+                }
+                else {
+                    Toast.makeText(this, "Please input all the patient info. Try again!", Toast.LENGTH_LONG).show();
+                }
+
                 break;
             case R.id.stop_button:
-                Toast.makeText(this, "Stop button pressed", Toast.LENGTH_SHORT).show();
                 pause_flag = true;
                 runCount = 0;
+                /* Optional :
+                    Erase Input Boxes for fresh entry
+                 */
+                running(pause_flag);
                 break;
         }
-
-        // Buggy part
-//        Runnable runnable = new Runnable()
-//        {
-//            @Override
-//            public void run()
-//            {
-//                running(pause_flag);
-//                handler.postDelayed(this, 750);
-//            }
-//        };
-//        handler.postDelayed(runnable, 750);
-        running(pause_flag);
     }
 
     public void running(boolean pause_flag) {
@@ -144,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void initView() {
         setContentView(R.layout.activity_main);
         // Assign buttons to variables
+        debugText = findViewById(R.id.debug);
         run_button_var = findViewById(R.id.run_button);
         stop_button_var = findViewById(R.id.stop_button);
 
@@ -156,12 +196,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onResume() {
         if(pause_flag==false)
             mHandler.postDelayed(mTimer1, 300);
+        if(accelerometer!=null)
+            sensorManager.registerListener(this,accelerometer,sensor_sampling_rate);
         super.onResume();
     }
 
     @Override
     public void onPause() {
         mHandler.removeCallbacks(mTimer1);
+        sensorManager.unregisterListener(this);
         super.onPause();
     }
 
@@ -180,4 +223,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     Random mRand = new Random();
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        float x = sensorEvent.values[0];
+        float y = sensorEvent.values[1];
+        float z = sensorEvent.values[2];
+        debugText.setText(x+" "+y+" "+z);
+
+        if(!pause_flag)
+        {
+            /*
+                To:DO //
+                Add this readings along with timestamp to the database table
+                But only if graph is being drawn (Run was pressed.)
+             */
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+        //Most probably not needed
+    }
 }
