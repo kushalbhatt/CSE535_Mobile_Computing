@@ -1,6 +1,7 @@
 package com.example.kushal.mc535;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -27,7 +28,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, SensorEventListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     //Create these global variables to be accesses between methods within the MainActivity class.
     private final Handler mHandler = new Handler();
     private Runnable mTimer1;
@@ -36,16 +37,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public int runCount = 0;
 
     Button run_button_var, stop_button_var;
-    private TextView debugText;
+    static TextView debugText;
     // Status flag for pausing
     private boolean pause_flag = false;
     public ArrayList<DataPoint> lastPlotted = new ArrayList<DataPoint>();
     public DataPoint[] temp = new DataPoint[30];
 
     private DatabaseHelper dbHelper;
-    private SensorManager sensorManager;
-    private Sensor accelerometer;
-    private int sensor_sampling_rate = 1000000;  // 1 sec
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,17 +70,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //initialize the db helper
         dbHelper = new DatabaseHelper(this);
-
-        //get sensor status and register for updates
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-
-        if(accelerometer==null)
-        {
-            //oops
-           Toast.makeText(this,"Accelerometer is not available!",Toast.LENGTH_LONG);
-           // AlertDialog can also be shown -- Optional
-        }
     }
 
     @Override
@@ -105,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         return super.onOptionsItemSelected(item);
     }
+
+
 
     //This button listener class will initiate actions when buttons are pressed.
     @Override
@@ -130,7 +120,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                  */
                 //input sanity check to avoid errors
                 if(!patient_age.isEmpty() && !patient_name.isEmpty() && !patient_id.isEmpty()) {
-                    dbHelper.createPatientTable(patient_name + "_" + patient_id + "_" + patient_age + "_" + sex);
+                    String tablename = patient_name + "_" + patient_id + "_" + patient_age + "_" + sex;
+                    dbHelper.createPatientTable(tablename);
+                    debugText.setText("Starting Service");
+                    //Start the senorlistner to sample accelerometer data
+                    Intent sensorService = new Intent(MainActivity.this,SensorlistnerService.class);
+                    /*Use Bundle if any data needs to be passed along with this intent*/
+                    sensorService.putExtra("table_name",tablename);
+                    startService(sensorService);
+
+                    //we might not need running. As now we have actual sensordata and not the random data
                     running(pause_flag);
                 }
                 else {
@@ -144,6 +143,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 /* Optional :
                     Erase Input Boxes for fresh entry
                  */
+
+                //we might not need running. As now we have actual sensordata and not the random data
                 running(pause_flag);
                 break;
         }
@@ -196,15 +197,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onResume() {
         if(pause_flag==false)
             mHandler.postDelayed(mTimer1, 300);
-        if(accelerometer!=null)
-            sensorManager.registerListener(this,accelerometer,sensor_sampling_rate);
+        //if(accelerometer!=null)
+        //    sensorManager.registerListener(this,accelerometer,sensor_sampling_rate);
         super.onResume();
     }
 
     @Override
     public void onPause() {
         mHandler.removeCallbacks(mTimer1);
-        sensorManager.unregisterListener(this);
+        //sensorManager.unregisterListener(this);
         super.onPause();
     }
 
@@ -225,24 +226,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Random mRand = new Random();
 
     @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        float x = sensorEvent.values[0];
-        float y = sensorEvent.values[1];
-        float z = sensorEvent.values[2];
-        debugText.setText(x+" "+y+" "+z);
-
-        if(!pause_flag)
-        {
-            /*
-                To:DO //
-                Add this readings along with timestamp to the database table
-                But only if graph is being drawn (Run was pressed.)
-             */
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
-        //Most probably not needed
+    protected void onDestroy() {
+        //kill the service when app closes
+        stopService(new Intent(this,SensorlistnerService.class));
+        super.onDestroy();
     }
 }
