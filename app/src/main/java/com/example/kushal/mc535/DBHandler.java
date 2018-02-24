@@ -64,7 +64,7 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
     public Patient findHandler(String patientname) {
-        String query = "Select * FROM " + TABLE_NAME + "WHERE" + COLUMN_NAME + " = " + "'" + patientname + "'";
+        String query = "Select * FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " = " + "'" + patientname + "'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = null;
         cursor = db.rawQuery(query, null);

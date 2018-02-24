@@ -202,7 +202,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Patient patient =
                 dbHandler.findHandler(name);
         if (patient != null) {
-            lst.setText(String.valueOf(patient.getID()) + " " + patient.getPatientName() + System.getProperty("line.separator"));
+            //debug: Toast.makeText(this, String.valueOf(patient.getID()) + " " + patient.getPatientName() + System.getProperty("line.separator"), Toast.LENGTH_LONG).show();
+            //debugText.setText(String.valueOf(patient.getID()) + " " + patient.getPatientName() + System.getProperty("line.separator"));
         } else {
             addPatient(id,age,name,sex);
         }
