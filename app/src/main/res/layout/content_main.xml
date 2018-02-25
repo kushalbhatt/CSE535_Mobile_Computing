@@ -100,15 +100,18 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/sex"
         android:layout_toEndOf="@+id/idText"
-        android:text="RUN"
-        android:backgroundTint="@android:color/holo_green_light"/>
+        android:layout_toStartOf="@+id/stop_button"
+        android:backgroundTint="@android:color/holo_green_light"
+        android:text="RUN" />
 
     <Button
         android:id="@+id/stop_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/run_button"
+        android:layout_alignBottom="@+id/run_button"
+        android:layout_alignEnd="@+id/nameText"
         android:layout_alignStart="@+id/nameText"
-        android:layout_alignTop="@+id/run_button"
         android:backgroundTint="@android:color/holo_red_dark"
         android:text="Stop"
         android:textColor="@android:color/white" />
@@ -125,10 +128,27 @@
         android:id="@+id/debug"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/graph"
-        android:layout_alignStart="@+id/run_button"
-        android:layout_marginStart="11dp"
+        android:layout_below="@+id/rg1"
+        android:layout_toEndOf="@+id/sex"
         android:text="TextView" />
+
+    <Button
+        android:id="@+id/download_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/run_button"
+        android:layout_alignStart="@+id/run_button"
+        android:layout_below="@+id/run_button"
+        android:text="Download" />
+
+    <Button
+        android:id="@+id/upload_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/nameText"
+        android:layout_below="@+id/stop_button"
+        android:layout_toEndOf="@+id/run_button"
+        android:text="Upload" />
 
 
 </RelativeLayout>

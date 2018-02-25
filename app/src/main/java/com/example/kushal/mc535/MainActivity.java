@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public double xMax;
     public int runCount = 0;
 
-    Button run_button_var, stop_button_var;
+    Button run_button_var, stop_button_var, download_button_var, upload_button_var;
     static TextView debugText;
     TextView lst;
     // Status flag for pausing
@@ -149,6 +149,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //we might not need running. As now we have actual sensordata and not the random data
                 running(pause_flag);
                 break;
+            case R.id.download_button:
+                break;
+            case R.id.upload_button:
+                break;
         }
     }
     public void loadPatient(View view) {
@@ -209,10 +213,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         debugText = findViewById(R.id.debug);
         run_button_var = findViewById(R.id.run_button);
         stop_button_var = findViewById(R.id.stop_button);
+        download_button_var = findViewById(R.id.download_button);
+        upload_button_var = findViewById(R.id.upload_button);
 
         // Set on-click listeners to buttons (described here: https://www.youtube.com/watch?v=GtxVILjLcw8K)
         run_button_var.setOnClickListener(this);
         stop_button_var.setOnClickListener(this);
+        download_button_var.setOnClickListener(this);
+        upload_button_var.setOnClickListener(this);
     }
 
     @Override
