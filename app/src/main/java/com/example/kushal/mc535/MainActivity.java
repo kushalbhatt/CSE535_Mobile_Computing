@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button run_button_var, stop_button_var;
     static TextView debugText;
     TextView lst;
-    EditText patientid, patientage, patientname, patientsex;
     // Status flag for pausing
     private boolean pause_flag = false;
     public ArrayList<DataPoint> lastPlotted = new ArrayList<DataPoint>();
@@ -125,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if(!patient_age.isEmpty() && !patient_name.isEmpty() && !patient_id.isEmpty()) {
                     String tablename = patient_name + "_" + patient_id + "_" + patient_age + "_" + sex;
                     //dbHelper.createPatientTable(tablename);
-                    findPatient(patient_id, patient_age,patient_name, sex);
+                    findPatient(1,2,3,4);
                     debugText.setText("Starting Service");
                     //Start the senorlistner to sample accelerometer data
                     Intent sensorService = new Intent(MainActivity.this,SensorlistnerService.class);
@@ -155,57 +154,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void loadPatient(View view) {
         DBHandler dbHandler = new DBHandler(this, null, null, 1);
         lst.setText(dbHandler.loadHandler());
-        patientid.setText("");
-        patientage.setText("");
-        patientname.setText("");
-        patientsex.setText("");
     }
-    public void updateStudent(View view) {
-        DBHandler dbHandler = new DBHandler(this, null,
-                null, 1);
-        boolean result = dbHandler.updateHandler(Integer.parseInt(
-                patientid.getText().toString()),Integer.parseInt(
-                patientage.getText().toString()), patientname.getText().toString(), patientsex.getText().toString());
-        if (result) {
-            patientid.setText("");
-            patientage.setText("");
-            patientname.setText("");
-            patientsex.setText("");
-            lst.setText("Record Updated");
-        } else
-            patientid.setText("No Match Found");
-    }
-    public void removePatient(View view) {
-        DBHandler dbHandler = new DBHandler(this, null,
-                null, 1);
-        boolean result = dbHandler.deleteHandler(Integer.parseInt(
-                patientid.getText().toString()));
-        if (result) {
-            patientid.setText("");
-            patientage.setText("");
-            patientname.setText("");
-            patientsex.setText("");
-            lst.setText("Record Deleted");
-        } else
-            patientid.setText("No Match Found");
-    }
-    public void addPatient(String id, String age, String name, String sex) {
-        int iD = Integer.parseInt(id.toString());
-        int aGE = Integer.parseInt(age.toString());
-        String nAME = name;
-        String sEX = sex;
-        Patient patient = new Patient(iD, aGE, nAME, sEX);
+    //
+    public void addPatient(int timestamp, int x, int y, int z){//(String timestamp, String x, String y, String z) {
+        Patient patient = new Patient(timestamp, x, y, z);
         dbHandler.addHandler(patient);
     }
 
-    public void findPatient(String id, String age, String name, String sex) {
-        Patient patient =
-                dbHandler.findHandler(name);
+    //IMPORTANT: Find patient will check to see if an entry for a given timestamp has already been made.
+    //if it hasn't been made, it will create a field.
+    public void findPatient(int timestamp, int x, int y, int z) {
+        Patient patient = dbHandler.findHandler(timestamp);
         if (patient != null) {
-            //debug: Toast.makeText(this, String.valueOf(patient.getID()) + " " + patient.getPatientName() + System.getProperty("line.separator"), Toast.LENGTH_LONG).show();
-            //debugText.setText(String.valueOf(patient.getID()) + " " + patient.getPatientName() + System.getProperty("line.separator"));
-        } else {
-            addPatient(id,age,name,sex);
+            Toast.makeText(this, String.valueOf(patient.getTimestamp()) + " " + patient.getXValues() + System.getProperty("line.separator"), Toast.LENGTH_LONG).show();
+        }
+        else {
+            addPatient(timestamp,x,y,z);
         }
     }
     public void running(boolean pause_flag) {

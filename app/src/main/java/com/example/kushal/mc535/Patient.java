@@ -6,43 +6,43 @@ package com.example.kushal.mc535;
 
 public class Patient {
     //fields
-    private int patientID;
-    private int patientAge;
-    private String patientName;
-    private String patientSex;
+    private int patienttimestamp;
+    private int patientxvalues;
+    private int patientyvalues;
+    private int patientzvalues;
     // constructors
     public Patient() {}
-    public Patient(int id, int age, String name, String gender) {
-        this.patientID = id;
-        this.patientAge = age;
-        this.patientName = name;
-        this.patientSex = gender;
+    public Patient(int timestamp, int xvalues, int yvalues, int zvalues) {
+        this.patienttimestamp = timestamp;
+        this.patientxvalues = xvalues;
+        this.patientyvalues = yvalues;
+        this.patientzvalues = zvalues;
 
     }
     // properties
-    public void setID(int id) {
-        this.patientID = id;
+    public void setTimestamp(int timeStamp) {
+        this.patienttimestamp = timeStamp;
     }
-    public int getID() {
-        return this.patientID;
+    public int getTimestamp() {
+        return this.patienttimestamp;
     }
-    public void setPatientAge(int age) {
-        this.patientAge = age;
+    public void setXValues(int x) {
+        this.patientxvalues = x;
     }
-    public int getPatientAge() {
-        return this.patientAge;
+    public int getXValues() {
+        return this.patientxvalues;
     }
-    public void setPatientName(String patientname) {
-        this.patientName = patientname;
+    public void setYValues(int y) {
+        this.patientyvalues = y;
     }
-    public String getPatientName() {
-        return this.patientName;
+    public int getYValues() {
+        return this.patientyvalues;
     }
-    public void setPatientSex(String sex) {
-        this.patientSex = sex;
+    public void setZValues(int z) {
+        this.patientzvalues = z;
     }
-    public String getPatientSex() {
-        return this.patientSex;
+    public int getZValues() {
+        return this.patientzvalues;
     }
 }
 

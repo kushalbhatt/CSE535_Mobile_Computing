@@ -13,12 +13,12 @@ import android.database.Cursor;
 
 public class DBHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "studentDB.db";
-    public static final String TABLE_NAME = "Patient";
-    public static final String COLUMN_ID = "PatientID";
-    public static final String COLUMN_AGE = "PatientAge";
-    public static final String COLUMN_NAME = "PatientName";
-    public static final String COLUMN_SEX = "PatientSex";
+    private static final String DATABASE_NAME = "patientDB.db";
+    public static final String TABLE_NAME = "Name_ID_Age_Sex";
+    public static final String COLUMN_TIMESTAMP = "Timestamp";
+    public static final String COLUMN_X = "XValues";
+    public static final String COLUMN_Y = "YValues";
+    public static final String COLUMN_Z = "ZValues";
     //initialize the database
     public DBHandler(Context context, String name,
                      SQLiteDatabase.CursorFactory factory, int version) {
@@ -27,10 +27,10 @@ public class DBHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_TABLE = " CREATE TABLE " + TABLE_NAME + " (" +
-                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_AGE + " INTEGER NOT NULL, " +
-                COLUMN_NAME + " TEXT NOT NULL, " +
-                COLUMN_SEX + " TEXT NOT NULL);";
+                COLUMN_TIMESTAMP + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_X + " INTEGER NOT NULL, " +
+                COLUMN_Y + " INTEGER NOT NULL, " +
+                COLUMN_Z + " INTEGER NOT NULL);";
                 //"CREATE TABLE" + TABLE_NAME + "(" + COLUMN_ID +
                 //"INTEGER PRIMARYKEY," + COLUMN_AGE +
                 //"INTEGER," + COLUMN_NAME + "TEXT," + COLUMN_SEX + "TEXT )";
@@ -55,26 +55,26 @@ public class DBHandler extends SQLiteOpenHelper {
     }
     public void addHandler(Patient patient) {
         ContentValues values = new ContentValues();
-        values.put(COLUMN_ID, patient.getID());
-        values.put(COLUMN_AGE, patient.getPatientAge());
-        values.put(COLUMN_NAME, patient.getPatientName());
-        values.put(COLUMN_SEX, patient.getPatientSex());
+        values.put(COLUMN_TIMESTAMP, patient.getTimestamp());
+        values.put(COLUMN_X, patient.getXValues());
+        values.put(COLUMN_Y, patient.getYValues());
+        values.put(COLUMN_Z, patient.getZValues());
         SQLiteDatabase db = this.getWritableDatabase();
         db.insert(TABLE_NAME, null, values);
         db.close();
     }
-    public Patient findHandler(String patientname) {
-        String query = "Select * FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " = " + "'" + patientname + "'";
+    public Patient findHandler(int timestamp) {
+        String query = "Select * FROM " + TABLE_NAME + " WHERE " + COLUMN_TIMESTAMP + " = " + timestamp;
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = null;
         cursor = db.rawQuery(query, null);
         Patient patient = new Patient();
         if (cursor!=null && cursor.moveToFirst()) {
             cursor.moveToFirst();
-            patient.setID(Integer.parseInt(cursor.getString(0)));
-            patient.setPatientAge(Integer.parseInt(cursor.getString(1)));
-            patient.setPatientName(cursor.getString(2));
-            patient.setPatientSex(cursor.getString(3));
+            patient.setTimestamp(Integer.parseInt(cursor.getString(0)));
+            patient.setXValues(Integer.parseInt(cursor.getString(1)));
+            patient.setYValues(Integer.parseInt(cursor.getString(2)));
+            patient.setZValues(Integer.parseInt(cursor.getString(3)));
             cursor.close();
         } else {
             patient = null;
@@ -84,15 +84,15 @@ public class DBHandler extends SQLiteOpenHelper {
     }
     public boolean deleteHandler(int iD) {
         boolean result = false;
-        String query = "Select*FROM" + TABLE_NAME + "WHERE" + COLUMN_ID + "= '" + String.valueOf(iD) + "'";
+        String query = "Select*FROM" + TABLE_NAME + "WHERE" + COLUMN_TIMESTAMP + "= '" + String.valueOf(iD) + "'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(query, null);
         Patient patient = new Patient();
         if (cursor.moveToFirst()) {
-            patient.setID(Integer.parseInt(cursor.getString(0)));
-            db.delete(TABLE_NAME, COLUMN_ID + "=?",
+            patient.setTimestamp(Integer.parseInt(cursor.getString(0)));
+            db.delete(TABLE_NAME, COLUMN_TIMESTAMP + "=?",
                     new String[] {
-                String.valueOf(patient.getID())
+                String.valueOf(patient.getTimestamp())
             });
             cursor.close();
             result = true;
@@ -103,11 +103,11 @@ public class DBHandler extends SQLiteOpenHelper {
     public boolean updateHandler(int iD, int age, String name, String sex) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues args = new ContentValues();
-        args.put(COLUMN_ID, iD);
-        args.put(COLUMN_AGE, age);
-        args.put(COLUMN_NAME, name);
-        args.put(COLUMN_SEX, sex);
-        return db.update(TABLE_NAME, args, COLUMN_ID + "=" + iD, null) > 0;
+        args.put(COLUMN_TIMESTAMP, iD);
+        args.put(COLUMN_X, age);
+        args.put(COLUMN_Y, name);
+        args.put(COLUMN_Z, sex);
+        return db.update(TABLE_NAME, args, COLUMN_TIMESTAMP + "=" + iD, null) > 0;
     }
 
 }
