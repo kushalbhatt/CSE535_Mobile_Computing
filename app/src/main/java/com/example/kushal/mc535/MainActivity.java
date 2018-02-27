@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public DataPoint[] temp = new DataPoint[30];
 
     //private DatabaseHelper dbHelper;
-    private DBHandler dbHandler= new DBHandler(this, null, null, 1);
+    private DBHandler dbHandler= new DBHandler(this);
     private long timeStamp;
     SensorlistnerService SLS = new SensorlistnerService();
 
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     dbHandler.createPatientTable(tablename);
                     SLS.setDbName(tablename);
                     //debug to maker sure entries exist in database
-                    // findPatient(1,2,3,4);//show how this works
+                    findPatient(1,2,3,4);//show how this works
                     debugText.setText("Starting Service");
                     //Start the senorlistner to sample accelerometer data
                     Intent sensorService = new Intent(MainActivity.this,SensorlistnerService.class);

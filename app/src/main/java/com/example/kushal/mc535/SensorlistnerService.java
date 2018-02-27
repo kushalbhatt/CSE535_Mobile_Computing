@@ -19,7 +19,7 @@ import android.widget.Toast;
 public class SensorlistnerService extends Service implements SensorEventListener{
 
     //variables to set up the database
-    private DBHandler dbHandler= new DBHandler(this, null, null, 1);
+    private DBHandler dbHandler= new DBHandler(this);
     private String dbName="ID_AGE_NAME_SEX";
     //JOSH: set the current x, y, and z values to currentX, currentY, currentZ  respectively
     // and then simply call sendToDatabase(). This function takes no input so all you need to do
@@ -100,13 +100,13 @@ public class SensorlistnerService extends Service implements SensorEventListener
     public void setDbName(String name)
     {
         this.dbName = name;
-        //Initialize table using table name
-        dbHandler.createPatientTable(dbName);
     }
     //This should be called only after the run button is pressed in the GUI so the correct table
     //name is passed.
     public void sendToDatabase()
     {
+        //Initialize table using table name
+        dbHandler.createPatientTable(dbName);
         //create a timestamp that the x, y, and z values are generated in
         timestamp=System.currentTimeMillis()/1000;
         //Create an object using the current timestamp, x, y, and z
