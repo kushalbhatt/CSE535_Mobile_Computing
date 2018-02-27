@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.content.Context;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.util.Log;
 
 /**
  * Created by RachelDedinsky on 2/23/18.
@@ -14,60 +15,49 @@ import android.database.Cursor;
 public class DBHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "patientDB.db";
-    public static final String TABLE_NAME = "Name_ID_Age_Sex";
+    public static String TABLE_NAME = "Name_ID_Age_Sex";
     public static final String COLUMN_TIMESTAMP = "Timestamp";
     public static final String COLUMN_X = "XValues";
     public static final String COLUMN_Y = "YValues";
     public static final String COLUMN_Z = "ZValues";
     //initialize the database
+    private SQLiteDatabase database = null;
     public DBHandler(Context context, String name,
-                     SQLiteDatabase.CursorFactory factory, int version) {
+                     SQLiteDatabase.CursorFactory factory, int version)
+    {
         super(context, DATABASE_NAME, factory, DATABASE_VERSION);
     }
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String CREATE_TABLE = " CREATE TABLE " + TABLE_NAME + " (" +
-                COLUMN_TIMESTAMP + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_X + " INTEGER NOT NULL, " +
-                COLUMN_Y + " INTEGER NOT NULL, " +
-                COLUMN_Z + " INTEGER NOT NULL);";
-                //"CREATE TABLE" + TABLE_NAME + "(" + COLUMN_ID +
-                //"INTEGER PRIMARYKEY," + COLUMN_AGE +
-                //"INTEGER," + COLUMN_NAME + "TEXT," + COLUMN_SEX + "TEXT )";
-        db.execSQL(CREATE_TABLE);
+        //called only after getReadable or getWritableDatabase() is invoked
+        database = db;
+        //if required add code here when db is first created
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {}
-    public String loadHandler() {
-        String result = "";
-        String query = "Select*FROM" + TABLE_NAME;
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(query, null);
-        while (cursor.moveToNext()) {
-            int result_0 = cursor.getInt(0);
-            String result_1 = cursor.getString(1);
-            result += String.valueOf(result_0) + " " + result_1 +
-                    System.getProperty("line.separator");
-        }
-        cursor.close();
-        db.close();
-        return result;
+    public  void createPatientTable(String table)
+    {
+        database = getWritableDatabase();
+        //Intger is 8 bytes long, as is a long, so timestamp can be stored in an integer
+        String create_table = "CREATE TABLE IF NOT EXISTS "+table+"(ID INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                COLUMN_TIMESTAMP+" INTEGER,"+
+                COLUMN_X+" REAL,"+COLUMN_Y+" REAL,"+COLUMN_Z+" REAL);";
+        TABLE_NAME=table;
+        database.execSQL(create_table);
     }
+    //Use this to add entries to the database
     public void addHandler(Patient patient) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_TIMESTAMP, patient.getTimestamp());
         values.put(COLUMN_X, patient.getXValues());
         values.put(COLUMN_Y, patient.getYValues());
         values.put(COLUMN_Z, patient.getZValues());
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.insert(TABLE_NAME, null, values);
-        db.close();
+        database.insert(TABLE_NAME, null, values);
     }
-    public Patient findHandler(int timestamp) {
-        String query = "Select * FROM " + TABLE_NAME + " WHERE " + COLUMN_TIMESTAMP + " = " + timestamp;
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = null;
-        cursor = db.rawQuery(query, null);
+    //Use this to check if a timestamp already exists in the database.
+    public Patient findHandler(long timestamp) {
+        String query = "Select * FROM " + TABLE_NAME + " WHERE " + COLUMN_TIMESTAMP + "=" + timestamp;
+        Cursor cursor = database.rawQuery(query, null);
         Patient patient = new Patient();
         if (cursor!=null && cursor.moveToFirst()) {
             cursor.moveToFirst();
@@ -79,35 +69,6 @@ public class DBHandler extends SQLiteOpenHelper {
         } else {
             patient = null;
         }
-        db.close();
         return patient;
     }
-    public boolean deleteHandler(int iD) {
-        boolean result = false;
-        String query = "Select*FROM" + TABLE_NAME + "WHERE" + COLUMN_TIMESTAMP + "= '" + String.valueOf(iD) + "'";
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(query, null);
-        Patient patient = new Patient();
-        if (cursor.moveToFirst()) {
-            patient.setTimestamp(Integer.parseInt(cursor.getString(0)));
-            db.delete(TABLE_NAME, COLUMN_TIMESTAMP + "=?",
-                    new String[] {
-                String.valueOf(patient.getTimestamp())
-            });
-            cursor.close();
-            result = true;
-        }
-        db.close();
-        return result;
-    }
-    public boolean updateHandler(int iD, int age, String name, String sex) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues args = new ContentValues();
-        args.put(COLUMN_TIMESTAMP, iD);
-        args.put(COLUMN_X, age);
-        args.put(COLUMN_Y, name);
-        args.put(COLUMN_Z, sex);
-        return db.update(TABLE_NAME, args, COLUMN_TIMESTAMP + "=" + iD, null) > 0;
-    }
-
 }

@@ -1,25 +1,25 @@
 package com.example.kushal.mc535;
 
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.RadioGroup;
 
 
 import com.jjoe64.graphview.series.DataPoint;
@@ -45,7 +45,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public DataPoint[] temp = new DataPoint[30];
 
     //private DatabaseHelper dbHelper;
-    DBHandler dbHandler = new DBHandler(this, null, null, 1);
+    private DBHandler dbHandler= new DBHandler(this, null, null, 1);
+    private long timeStamp;
+    SensorlistnerService SLS = new SensorlistnerService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,8 +125,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //input sanity check to avoid errors
                 if(!patient_age.isEmpty() && !patient_name.isEmpty() && !patient_id.isEmpty()) {
                     String tablename = patient_name + "_" + patient_id + "_" + patient_age + "_" + sex;
-                    //dbHelper.createPatientTable(tablename);
-                    findPatient(1,2,3,4);
+                    dbHandler.createPatientTable(tablename);
+                    SLS.setDbName(tablename);
+                    //debug to maker sure entries exist in database
+                    // findPatient(1,2,3,4);//show how this works
                     debugText.setText("Starting Service");
                     //Start the senorlistner to sample accelerometer data
                     Intent sensorService = new Intent(MainActivity.this,SensorlistnerService.class);
@@ -155,24 +159,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
-    public void loadPatient(View view) {
-        DBHandler dbHandler = new DBHandler(this, null, null, 1);
-        lst.setText(dbHandler.loadHandler());
-    }
     //
     public void addPatient(int timestamp, int x, int y, int z){//(String timestamp, String x, String y, String z) {
         Patient patient = new Patient(timestamp, x, y, z);
         dbHandler.addHandler(patient);
     }
 
+    //debug: check if added to database
     //IMPORTANT: Find patient will check to see if an entry for a given timestamp has already been made.
     //if it hasn't been made, it will create a field.
     public void findPatient(int timestamp, int x, int y, int z) {
         Patient patient = dbHandler.findHandler(timestamp);
         if (patient != null) {
+            //print debug to app
             Toast.makeText(this, String.valueOf(patient.getTimestamp()) + " " + patient.getXValues() + System.getProperty("line.separator"), Toast.LENGTH_LONG).show();
         }
         else {
+            //if the patient isn't in the database, add a patient to the database
             addPatient(timestamp,x,y,z);
         }
     }

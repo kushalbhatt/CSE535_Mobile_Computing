@@ -18,12 +18,20 @@ import android.widget.Toast;
 
 public class SensorlistnerService extends Service implements SensorEventListener{
 
-    private DatabaseHelper dbHelper;
+    //variables to set up the database
+    private DBHandler dbHandler= new DBHandler(this, null, null, 1);
+    private String dbName="ID_AGE_NAME_SEX";
+    //JOSH: set the current x, y, and z values to currentX, currentY, currentZ  respectively
+    // and then simply call sendToDatabase(). This function takes no input so all you need to do
+    // is set the current x, y, and z values followed by a call to the function sendToDatabase
+    private int currentX, currentY, currentZ;
+
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private int sensor_sampling_rate = 1000000;  // 1 sec
     private String current_patient = "";
     public static String LOG_TAG = "SensorListenerService";
+    private long timestamp;
     @Override
     public void onCreate() {
         //get sensor status and register for updates
@@ -37,7 +45,7 @@ public class SensorlistnerService extends Service implements SensorEventListener
             // AlertDialog can also be shown -- Optional
         }
         sensorManager.registerListener(this,accelerometer,sensor_sampling_rate);
-        dbHelper = new DatabaseHelper(this);
+        //dbHelper = new DatabaseHelper(this);
         Toast.makeText(this,"Service Started",Toast.LENGTH_LONG);
         super.onCreate();
     }
@@ -86,5 +94,24 @@ public class SensorlistnerService extends Service implements SensorEventListener
         sensorManager.unregisterListener(this);
         Log.d(LOG_TAG,"Service Stopped!");
         super.onDestroy();
+    }
+    //This function is called in the main activity after the user information has been entered in order
+    //to set up the database with the correct name
+    public void setDbName(String name)
+    {
+        this.dbName = name;
+        //Initialize table using table name
+        dbHandler.createPatientTable(dbName);
+    }
+    //This should be called only after the run button is pressed in the GUI so the correct table
+    //name is passed.
+    public void sendToDatabase()
+    {
+        //create a timestamp that the x, y, and z values are generated in
+        timestamp=System.currentTimeMillis()/1000;
+        //Create an object using the current timestamp, x, y, and z
+        Patient patient = new Patient(timestamp, currentX, currentY, currentZ);
+        //Send the patient to the database
+        dbHandler.addHandler(patient);
     }
 }
