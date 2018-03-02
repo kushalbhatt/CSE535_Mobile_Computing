@@ -37,7 +37,7 @@ public class DBHandler extends SQLiteOpenHelper {
     public  void createPatientTable(String table)
     {
         database = getWritableDatabase();
-        //Intger is 8 bytes long, as is a long, so timestamp can be stored in an integer
+        //Integer is 8 bytes long, as is a long, so timestamp can be stored in an integer
         String create_table = "CREATE TABLE IF NOT EXISTS "+table+"(ID INTEGER PRIMARY KEY AUTOINCREMENT,"+
                 COLUMN_TIMESTAMP+" INTEGER,"+
                 COLUMN_X+" REAL,"+COLUMN_Y+" REAL,"+COLUMN_Z+" REAL);";
@@ -47,6 +47,7 @@ public class DBHandler extends SQLiteOpenHelper {
     //Use this to add entries to the database
     public void addHandler(Patient patient) {
         ContentValues values = new ContentValues();
+        //Integer is 8 bytes long, as is a long, so timestamp can be stored in an integer
         values.put(COLUMN_TIMESTAMP, patient.getTimestamp());
         values.put(COLUMN_X, patient.getXValues());
         values.put(COLUMN_Y, patient.getYValues());
@@ -60,10 +61,10 @@ public class DBHandler extends SQLiteOpenHelper {
         Patient patient = new Patient();
         if (cursor!=null && cursor.moveToFirst()) {
             cursor.moveToFirst();
-            patient.setTimestamp(Integer.parseInt(cursor.getString(0)));
-            patient.setXValues(Integer.parseInt(cursor.getString(1)));
-            patient.setYValues(Integer.parseInt(cursor.getString(2)));
-            patient.setZValues(Integer.parseInt(cursor.getString(3)));
+            patient.setTimestamp(Long.parseLong(cursor.getString(0)));
+            patient.setXValues(Float.parseFloat(cursor.getString(1)));
+            patient.setYValues(Float.parseFloat(cursor.getString(2)));
+            patient.setZValues(Float.parseFloat(cursor.getString(3)));
             cursor.close();
         } else {
             patient = null;

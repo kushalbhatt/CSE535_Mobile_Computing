@@ -8,9 +8,9 @@ package com.example.kushal.mc535;
 public class Patient {
     //fields
     private long patienttimestamp;
-    private int patientxvalues;
-    private int patientyvalues;
-    private int patientzvalues;
+    private float patientxvalues;
+    private float patientyvalues;
+    private float patientzvalues;
     // constructors
     public Patient() {}
     public Patient(long timestamp, int xvalues, int yvalues, int zvalues) {
@@ -27,22 +27,22 @@ public class Patient {
     public long getTimestamp() {
         return this.patienttimestamp;
     }
-    public void setXValues(int x) {
+    public void setXValues(float x) {
         this.patientxvalues = x;
     }
-    public int getXValues() {
+    public float getXValues() {
         return this.patientxvalues;
     }
-    public void setYValues(int y) {
+    public void setYValues(float y) {
         this.patientyvalues = y;
     }
-    public int getYValues() {
+    public float getYValues() {
         return this.patientyvalues;
     }
-    public void setZValues(int z) {
+    public void setZValues(float z) {
         this.patientzvalues = z;
     }
-    public int getZValues() {
+    public float getZValues() {
         return this.patientzvalues;
     }
 }
