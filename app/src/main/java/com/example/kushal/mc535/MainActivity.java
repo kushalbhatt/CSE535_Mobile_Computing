@@ -3,9 +3,14 @@ package com.example.kushal.mc535;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
+
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -154,8 +159,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 running(pause_flag);
                 break;
             case R.id.download_button:
+
+                // Later to be moved to ASyncTask.
+                Thread downloadThread = new Thread() {
+                    public void run() {
+                        downLoad();
+                    }
+                };
+                if (!downloadThread.isAlive())
+                    downloadThread.start();
+                else {
+                    Toast.makeText(this, "Upload in progress! Try after few seconds!", Toast.LENGTH_LONG).show();
+                }
                 break;
+
             case R.id.upload_button:
+                String fileName = DBHandler.DATABASE_PATH+DBHandler.DATABASE_NAME;
+                File sourceFile = new File(fileName);
+                if (!sourceFile.exists()) {
+                    Log.d("KUSHAL","error opening file");
+                }
+                else {
+                    Log.d("KUSHAL","Database File size: "+sourceFile.length()+"   (bytes)");
+                    Thread uploadThread = new Thread() {
+                        public void run() {
+                            uploadDataBase();
+                        }
+                    };
+                    if (!uploadThread.isAlive())
+                        uploadThread.start();
+                    else {
+                        Toast.makeText(this, "Upload in progress! Try after few seconds!", Toast.LENGTH_LONG).show();
+                    }
+                }
                 break;
         }
     }
@@ -262,6 +298,106 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         //kill the service when app closes
         stopService(new Intent(this,SensorlistnerService.class));
+        dbHandler.close();
         super.onDestroy();
     }
+
+    private void uploadDataBase()
+    {
+                /*
+                    The uploading file code snippet is borrowed from following reference.
+                    https://androidexample.com/Upload_File_To_Server_-_Android_Example/index.php
+                 */
+
+        String fileName = DBHandler.DATABASE_PATH+DBHandler.DATABASE_NAME;
+        HttpURLConnection conn = null;
+        DataOutputStream dos = null;
+        String lineEnd = "\r\n";
+        String twoHyphens = "--";
+        String boundary = "*****";
+        int bytesRead, bytesAvailable, bufferSize;
+        byte[] buffer;
+        int maxBufferSize = 1 * 1024 * 1024;
+
+        File sourceFile = new File(fileName);
+
+        if (!sourceFile.exists()) {
+
+            Log.d("KUSHAL","error opening file");
+        }
+        else {
+            //upload
+            FileInputStream fileInputStream = null;
+            URL url = null;
+            try {
+                fileInputStream = new FileInputStream(sourceFile);
+                url = new URL("http://impact.asu.edu/CSE535Spring18Folder/UploadToServer.php");
+
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setDoInput(true); // Allow Inputs
+                conn.setDoOutput(true); // Allow Outputs
+                conn.setUseCaches(false); // Don't use a Cached Copy
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Connection", "Keep-Alive");
+                //conn.setRequestProperty("ENCTYPE", "multipart/form-data");
+                //conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+                conn.setRequestProperty("uploaded_file",fileName);
+
+                dos = new DataOutputStream(conn.getOutputStream());
+
+                dos.writeBytes(twoHyphens + boundary + lineEnd);
+                //dos.writeBytes("Content-Disposition: form-data; name="uploaded_file"; filename=""+ fileName + """ + lineEnd);
+
+                dos.writeBytes(lineEnd);
+
+                // create a buffer of  maximum size
+                bytesAvailable = fileInputStream.available();
+
+                bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                buffer = new byte[bufferSize];
+
+                // read file and write it into form...
+                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+                Log.d("KUSHAL","Bytes read: "+bytesRead);
+                while (bytesRead > 0) {
+                    dos.write(buffer, 0, bufferSize);
+                    bytesAvailable = fileInputStream.available();
+                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+                }
+
+                // send multipart form data necesssary after file data...
+                dos.writeBytes(lineEnd);
+                dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+
+                // Responses from the server (code and message)
+                int serverResponseCode = conn.getResponseCode();
+                String serverResponseMessage = conn.getResponseMessage();
+
+                Log.i("KUSHAL", "HTTP Response is : "
+                        + serverResponseMessage + ": " + serverResponseCode);
+
+                fileInputStream.close();
+                dos.flush();
+                dos.close();
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            // Open a HTTP  connection to  the URL
+        }
+    }
+
+    public void downLoad()
+    {
+        //To-DO::
+    }
+
 }
+

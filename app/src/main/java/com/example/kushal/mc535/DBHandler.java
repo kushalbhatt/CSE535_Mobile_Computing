@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.content.Context;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.Environment;
 import android.util.Log;
 
 /**
@@ -14,7 +15,10 @@ import android.util.Log;
 
 public class DBHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "patientDB.db";
+    //WE need to store db to Eternal SD CARD
+    public static final String DATABASE_PATH = Environment.getExternalStorageDirectory()+"/CSE535_ASSIGNMENT2/";
+    public static final String DATABASE_NAME = "patientDB.db";
+
     public static String TABLE_NAME = "Name_ID_Age_Sex";
     public static final String COLUMN_TIMESTAMP = "Timestamp";
     public static final String COLUMN_X = "XValues";
@@ -24,13 +28,14 @@ public class DBHandler extends SQLiteOpenHelper {
     private SQLiteDatabase database = null;
     public DBHandler(Context context)
     {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, DATABASE_PATH+DATABASE_NAME, null, DATABASE_VERSION);
     }
     @Override
     public void onCreate(SQLiteDatabase db) {
         //called only after getReadable or getWritableDatabase() is invoked
         database = db;
         //if required add code here when db is first created
+        Log.d("KUSHAL","OnCReate of db called");
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {}
@@ -43,6 +48,7 @@ public class DBHandler extends SQLiteOpenHelper {
                 COLUMN_X+" REAL,"+COLUMN_Y+" REAL,"+COLUMN_Z+" REAL);";
         TABLE_NAME=table;
         database.execSQL(create_table);
+        Log.d("KUSHAL","Tabel created : "+table);
     }
     //Use this to add entries to the database
     public void addHandler(Patient patient) {

@@ -70,7 +70,7 @@ public class SensorlistnerService extends Service implements SensorEventListener
         float x = sensorEvent.values[0];
         float y = sensorEvent.values[1];
         float z = sensorEvent.values[2];
-        MainActivity.debugText.setText(x+" "+y+" "+z);
+        //MainActivity.debugText.setText(x+" "+y+" "+z);
 
         //if(!pause_flag)
         {
