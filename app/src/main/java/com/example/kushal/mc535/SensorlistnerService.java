@@ -21,17 +21,13 @@ public class SensorlistnerService extends Service implements SensorEventListener
     //variables to set up the database
     private DBHandler dbHandler= new DBHandler(this);
     private String dbName="ID_AGE_NAME_SEX";
-    //JOSH: set the current x, y, and z values to currentX, currentY, currentZ  respectively
-    // and then simply call sendToDatabase(). This function takes no input so all you need to do
-    // is set the current x, y, and z values followed by a call to the function sendToDatabase
-    private int currentX, currentY, currentZ;
-
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private int sensor_sampling_rate = 1000000;  // 1 sec
     private String current_patient = "";
     public static String LOG_TAG = "SensorListenerService";
     private long timestamp;
+
     @Override
     public void onCreate() {
         //get sensor status and register for updates
@@ -49,8 +45,6 @@ public class SensorlistnerService extends Service implements SensorEventListener
         Toast.makeText(this,"Service Started",Toast.LENGTH_LONG);
         super.onCreate();
     }
-
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -70,16 +64,19 @@ public class SensorlistnerService extends Service implements SensorEventListener
         float x = sensorEvent.values[0];
         float y = sensorEvent.values[1];
         float z = sensorEvent.values[2];
-        //MainActivity.debugText.setText(x+" "+y+" "+z);
 
-        //if(!pause_flag)
+        if(!MainActivity.pause_flag)
         {
-            /*
-                To:DO //
-                Add this readings along with timestamp to the database table
-                But only if graph is being drawn (Run was pressed.)
-                Nam eof database is local variable = current_patient
-             */
+            // DEBUG:
+            MainActivity.debugText.setText(x+" "+y+" "+z);
+
+            // Pass sensor data to MainActivity class for plotting
+            MainActivity.set_sensor_vals(x,y,z);
+
+            //    Add this readings along with timestamp to the database table
+            //    But only if graph is being drawn (Run was pressed.)
+            //    Name of database is local variable = current_patient
+            sendToDatabase((int)x, (int)y, (int)z);
         }
     }
 
@@ -103,14 +100,16 @@ public class SensorlistnerService extends Service implements SensorEventListener
     }
     //This should be called only after the run button is pressed in the GUI so the correct table
     //name is passed.
-    public void sendToDatabase()
+    public void sendToDatabase(int x, int y, int z)
     {
+        // x, y, and z are values retrieved from the sensor in this class
+
         //Initialize table using table name
         dbHandler.createPatientTable(dbName);
         //create a timestamp that the x, y, and z values are generated in
         timestamp=System.currentTimeMillis()/1000;
         //Create an object using the current timestamp, x, y, and z
-        Patient patient = new Patient(timestamp, currentX, currentY, currentZ);
+        Patient patient = new Patient(timestamp, x, y, z);
         //Send the patient to the database
         dbHandler.addHandler(patient);
     }

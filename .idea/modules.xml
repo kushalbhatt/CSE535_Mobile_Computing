@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/17.iml" filepath="$PROJECT_DIR$/17.iml" />
+      <module fileurl="file://C:\Users\josh\Dropbox\cse535_josh\CSE535_HW2_final_2\CSE535\17.iml" filepath="C:\Users\josh\Dropbox\cse535_josh\CSE535_HW2_final_2\CSE535\17.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CSE535.iml" filepath="$PROJECT_DIR$/CSE535.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://C:\Users\josh\Dropbox\cse535_josh\CSE535_HW2_final_2\CSE535\app\app.iml" filepath="C:\Users\josh\Dropbox\cse535_josh\CSE535_HW2_final_2\CSE535\app\app.iml" />
     </modules>
   </component>
 </project>

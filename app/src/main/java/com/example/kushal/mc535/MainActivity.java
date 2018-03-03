@@ -31,6 +31,7 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 
 
+import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -41,24 +42,34 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     //Create these global variables to be accesses between methods within the MainActivity class.
-    private final Handler mHandler = new Handler();
-    private Runnable mTimer1;
-    private LineGraphSeries<DataPoint> mSeries1;
+    static boolean pause_flag = false; // Status flag for pausing
+    private final Handler handler_obj = new Handler();
+    private Runnable runnable_obj;
     public double xMax;
     public int runCount = 0;
-
     Button run_button_var, stop_button_var, download_button_var, upload_button_var;
     static TextView debugText;
     TextView lst;
-    // Status flag for pausing
-    private boolean pause_flag = false;
-    public ArrayList<DataPoint> lastPlotted = new ArrayList<DataPoint>();
-    public DataPoint[] temp = new DataPoint[30];
 
     //private DatabaseHelper dbHelper;
     private DBHandler dbHandler= new DBHandler(this);
     private long timeStamp;
     SensorlistnerService SLS = new SensorlistnerService();
+
+    // Grab sensor data from SensorlistenerService class for plotting
+    static float X, Y, Z;
+    static void set_sensor_vals(float x, float y, float z) {
+        X = x;
+        Y = y;
+        Z = z;
+    }
+
+    // Graphing stuffs
+    GraphView graph_X, graph_Y, graph_Z;
+    private LineGraphSeries<DataPoint> mSeries_x, mSeries_y, mSeries_z;
+    public ArrayList<DataPoint> lastPlotted_x = new ArrayList<DataPoint>();
+    public ArrayList<DataPoint> lastPlotted_y = new ArrayList<DataPoint>();
+    public ArrayList<DataPoint> lastPlotted_z = new ArrayList<DataPoint>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,25 +77,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Initialize the view.
         initView();
-        com.jjoe64.graphview.GraphView graph = (com.jjoe64.graphview.GraphView) findViewById(R.id.graph);
-        //initial graph random values
-        mSeries1 = new LineGraphSeries<>(generateData());
-        mSeries1.setColor(Color.GREEN);
-        graph.addSeries(mSeries1);
+        graph_X = (GraphView) findViewById(R.id.graph_X_id);
+        graph_Y = (GraphView) findViewById(R.id.graph_Y_id);
+        graph_Z = (GraphView) findViewById(R.id.graph_Z_id);
 
-        //graphview UI setup
-        graph.getViewport().setBackgroundColor(Color.BLACK);
-        graph.setTitle("ECG");
-        graph.setTitleColor(Color.BLUE);
-        graph.setTitleTextSize(50);
-        graph.getViewport().setXAxisBoundsManual(true);
-        graph.getViewport().setMinX(0);
-        graph.getViewport().setMinY(0);
-        graph.getViewport().setMaxX(30);
-        graph.getViewport().setMaxY(100);
+        //initial graph random values
+        mSeries_x = new LineGraphSeries<>(generateData(0));
+        mSeries_y = new LineGraphSeries<>(generateData(1));
+        mSeries_z = new LineGraphSeries<>(generateData(2));
+
+        initialize_graph(graph_X, mSeries_x, Color.BLUE, "x", 15);
+        initialize_graph(graph_Y, mSeries_y, Color.GREEN, "y", 15);
+        initialize_graph(graph_Z, mSeries_z, Color.RED, "z", 20);
 
         //initialize the db helper
         //dbHelper = new DatabaseHelper(this);
+    }
+
+    private void initialize_graph(GraphView graph,
+                                  LineGraphSeries<DataPoint> mSeries,
+                                  int color, String title, int yBounds) {
+        mSeries.setColor(color);
+        graph.addSeries(mSeries);
+        graph.getViewport().setBackgroundColor(Color.BLACK);
+        graph.setTitle(title);
+        graph.setTitleColor(Color.BLUE);
+        graph.setTitleTextSize(50);
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(30);
+        graph.getViewport().setMinY(-yBounds);
+        graph.getViewport().setMaxY(yBounds);
     }
 
     @Override
@@ -108,8 +132,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         return super.onOptionsItemSelected(item);
     }
-
-
 
     //This button listener class will initiate actions when buttons are pressed.
     @Override
@@ -221,37 +243,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             addPatient(timestamp,x,y,z);
         }
     }
+
+
     public void running(boolean pause_flag) {
         // Check to see if pause_flag has been set, if not, then draw graph
         if (pause_flag) {
-            mSeries1.resetData(new DataPoint[0]);
-            mHandler.removeCallbacks(mTimer1);
+            mSeries_x.resetData(new DataPoint[0]);
+            handler_obj.removeCallbacks(runnable_obj);
         } else {
             if (runCount == 1) {
-                mTimer1 = new Runnable() {
+
+                // Thread
+                runnable_obj = new Runnable() {
+
                     @Override
                     public void run() {
                         int j = 29;
                         //copy previously plotted values to temp array
-                        for(int i=(int)xMax;i>(int)xMax-30;i--){
-                            temp[j]=lastPlotted.get(i);
-                            j--;
+                        DataPoint[] local_arr = new DataPoint[30];
+                        for(int i=(int)xMax;i>(int)xMax-30;i--,j--){
+                            local_arr[j]=lastPlotted_x.get(i);
                         }
-
-                        mSeries1.resetData(temp);
-                        double y = mRand.nextDouble() * 200 + 0.3;
-                        DataPoint newData = new DataPoint(++xMax, y);
-                        //aapend newly created point
-                        mSeries1.appendData(newData, true, 50);
+                        xMax++;
+                        addData(lastPlotted_x, local_arr, new DataPoint(xMax, X), mSeries_x);
+                        addData(lastPlotted_y, local_arr, new DataPoint(xMax, Y), mSeries_y);
+                        addData(lastPlotted_z, local_arr, new DataPoint(xMax, Z), mSeries_z);
+                        handler_obj.postDelayed(this, 20);
+                    }
+                    void addData(ArrayList<DataPoint> lastPlotted, DataPoint[] dataPoint_arr,
+                                   DataPoint newData, LineGraphSeries<DataPoint> mSeries) {
+                        mSeries_x.resetData(dataPoint_arr);
                         lastPlotted.add(newData);
-                        mHandler.postDelayed(this, 300);
+                        mSeries.appendData(newData, true, 50);
                     }
                 };
-                //call this thread at spcified interval so new values will be added continuously
-                mHandler.postDelayed(mTimer1, 300);
+                //call this thread at specified interval so new values will be added continuously
+                handler_obj.postDelayed(runnable_obj, 20);
             }
         }
     }
+
     public void initView() {
         setContentView(R.layout.activity_main);
         // Assign buttons to variables
@@ -271,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onResume() {
         if(pause_flag==false)
-            mHandler.postDelayed(mTimer1, 300);
+            handler_obj.postDelayed(runnable_obj, 300);
         //if(accelerometer!=null)
         //    sensorManager.registerListener(this,accelerometer,sensor_sampling_rate);
         super.onResume();
@@ -279,26 +310,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onPause() {
-        mHandler.removeCallbacks(mTimer1);
+        handler_obj.removeCallbacks(runnable_obj);
         //sensorManager.unregisterListener(this);
         super.onPause();
     }
 
-    private DataPoint[] generateData() {
+    private DataPoint[] generateData( int axis_choice ) {
         int count = 30;
         DataPoint[] values = new DataPoint[count];
-        for (int i = 0; i < count; i++) {
-            double x = i;
-            double y = mRand.nextDouble() * 200 + 0.3;
+        for (int x = 0; x < count; x++)
+        {
             xMax = x;
-            DataPoint v = new DataPoint(x, y);
-            values[i] = v;
-            lastPlotted.add(v);
+            DataPoint z = new DataPoint(x, 0);
+            values[x] = z;
+            if (axis_choice == 0)      { lastPlotted_x.add(z); }
+            else if (axis_choice == 1) { lastPlotted_y.add(z); }
+            else if (axis_choice == 2) { lastPlotted_z.add(z); }
         }
         return values;
     }
-
-    Random mRand = new Random();
 
     @Override
     protected void onDestroy() {
@@ -451,6 +481,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 connection.disconnect();
         }
     }
-
 }
-
