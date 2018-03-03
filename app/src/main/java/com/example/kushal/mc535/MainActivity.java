@@ -4,7 +4,10 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -12,6 +15,7 @@ import java.net.URL;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,6 +36,8 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.ArrayList;
 import java.util.Random;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     //Create these global variables to be accesses between methods within the MainActivity class.
@@ -163,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // Later to be moved to ASyncTask.
                 Thread downloadThread = new Thread() {
                     public void run() {
-                        downLoad();
+                        downLoad(DBHandler.DATABASE_NAME);
                     }
                 };
                 if (!downloadThread.isAlive())
@@ -339,14 +345,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 conn.setUseCaches(false); // Don't use a Cached Copy
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Connection", "Keep-Alive");
-                //conn.setRequestProperty("ENCTYPE", "multipart/form-data");
-                //conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+                conn.setRequestProperty("ENCTYPE", "multipart/form-data");
+                conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
                 conn.setRequestProperty("uploaded_file",fileName);
 
                 dos = new DataOutputStream(conn.getOutputStream());
 
                 dos.writeBytes(twoHyphens + boundary + lineEnd);
-                //dos.writeBytes("Content-Disposition: form-data; name="uploaded_file"; filename=""+ fileName + """ + lineEnd);
+                dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\""+ fileName + "\"" + lineEnd);
 
                 dos.writeBytes(lineEnd);
 
@@ -380,6 +386,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 fileInputStream.close();
                 dos.flush();
                 dos.close();
+                conn.disconnect();
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -390,13 +397,59 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            // Open a HTTP  connection to  the URL
+
         }
     }
 
-    public void downLoad()
+    public void downLoad(String dbName)
     {
         //To-DO::
+        InputStream input = null;
+        OutputStream output = null;
+        HttpURLConnection connection = null;
+
+        try {
+            URL url = new URL("http://impact.asu.edu/CSE535Spring18Folder/"+dbName);
+            connection = (HttpURLConnection) url.openConnection();
+
+            connection.connect();
+
+            // expect HTTP 200 OK, so we don't mistakenly save error report
+            // instead of the file
+            if (connection.getResponseCode() != HttpsURLConnection.HTTP_OK) {
+                Log.d("KUSHAL","Server returned HTTP " + connection.getResponseCode()+ " " + connection.getResponseMessage());
+                return;
+            }
+
+            int fileLength = connection.getContentLength();
+            Log.d("KUSHAL","Download File length:: "+fileLength);
+
+            input = connection.getInputStream();
+            output = new FileOutputStream(Environment.getExternalStorageDirectory().getPath()+"/CSE535_ASSIGNMENT2_DOWN");
+            byte data[] = new byte[4096];
+            long total = 0;
+            int count;
+            while ((count = input.read(data)) != -1) {
+                total += count;
+                output.write(data, 0, count);
+            }
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                if (output != null)
+                    output.close();
+                if (input != null)
+                    input.close();
+            } catch (IOException ignored) {
+            }
+            if (connection != null)
+                connection.disconnect();
+        }
     }
 
 }
