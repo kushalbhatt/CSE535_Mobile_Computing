@@ -41,14 +41,18 @@ public class DBHandler extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {}
     public  void createPatientTable(String table)
     {
-        database = getWritableDatabase();
-        //Integer is 8 bytes long, as is a long, so timestamp can be stored in an integer
-        String create_table = "CREATE TABLE IF NOT EXISTS "+table+"(ID INTEGER PRIMARY KEY AUTOINCREMENT,"+
-                COLUMN_TIMESTAMP+" INTEGER,"+
-                COLUMN_X+" REAL,"+COLUMN_Y+" REAL,"+COLUMN_Z+" REAL);";
-        TABLE_NAME=table;
-        database.execSQL(create_table);
-        Log.d("KUSHAL","Tabel created : "+table);
+        if(database==null)
+            database = getWritableDatabase();
+        //kushal:  To avoid unnecessary db interactions as much as we can
+        if(!TABLE_NAME.equals(table)) {
+            //Integer is 8 bytes long, as is a long, so timestamp can be stored in an integer
+            String create_table = "CREATE TABLE IF NOT EXISTS " + table + "(ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    COLUMN_TIMESTAMP + " INTEGER," +
+                    COLUMN_X + " REAL," + COLUMN_Y + " REAL," + COLUMN_Z + " REAL);";
+            TABLE_NAME = table;
+            database.execSQL(create_table);
+            Log.d("KUSHAL", "Tabel created : " + table);
+        }
     }
     //Use this to add entries to the database
     public void addHandler(Patient patient) {

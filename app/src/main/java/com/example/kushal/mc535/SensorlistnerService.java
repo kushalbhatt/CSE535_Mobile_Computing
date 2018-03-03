@@ -20,7 +20,7 @@ public class SensorlistnerService extends Service implements SensorEventListener
 
     //variables to set up the database
     private DBHandler dbHandler= new DBHandler(this);
-    private String dbName="ID_AGE_NAME_SEX";
+    static String dbName="ID_AGE_NAME_SEX";
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private int sensor_sampling_rate = 1000000;  // 1 sec
@@ -68,7 +68,7 @@ public class SensorlistnerService extends Service implements SensorEventListener
         if(!MainActivity.pause_flag)
         {
             // DEBUG:
-            MainActivity.debugText.setText(x+" "+y+" "+z);
+            //MainActivity.debugText.setText(x+" "+y+" "+z);
 
             // Pass sensor data to MainActivity class for plotting
             MainActivity.set_sensor_vals(x,y,z);
@@ -76,7 +76,7 @@ public class SensorlistnerService extends Service implements SensorEventListener
             //    Add this readings along with timestamp to the database table
             //    But only if graph is being drawn (Run was pressed.)
             //    Name of database is local variable = current_patient
-            sendToDatabase((int)x, (int)y, (int)z);
+            sendToDatabase(x, y, z);
         }
     }
 
@@ -94,13 +94,13 @@ public class SensorlistnerService extends Service implements SensorEventListener
     }
     //This function is called in the main activity after the user information has been entered in order
     //to set up the database with the correct name
-    public void setDbName(String name)
+    public static void setDbName(String name)
     {
-        this.dbName = name;
+        dbName = name;
     }
     //This should be called only after the run button is pressed in the GUI so the correct table
     //name is passed.
-    public void sendToDatabase(int x, int y, int z)
+    public void sendToDatabase(float x, float y, float z)
     {
         // x, y, and z are values retrieved from the sensor in this class
 

@@ -13,7 +13,7 @@ public class Patient {
     private float patientzvalues;
     // constructors
     public Patient() {}
-    public Patient(long timestamp, int xvalues, int yvalues, int zvalues) {
+    public Patient(long timestamp, float xvalues, float yvalues, float zvalues) {
         this.patienttimestamp = timestamp;
         this.patientxvalues = xvalues;
         this.patientyvalues = yvalues;

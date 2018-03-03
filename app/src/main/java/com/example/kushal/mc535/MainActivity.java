@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
+import android.annotation.SuppressLint;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Environment;
@@ -54,7 +55,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //private DatabaseHelper dbHelper;
     private DBHandler dbHandler= new DBHandler(this);
     private long timeStamp;
-    SensorlistnerService SLS = new SensorlistnerService();
 
     // Grab sensor data from SensorlistenerService class for plotting
     static float X, Y, Z;
@@ -134,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     //This button listener class will initiate actions when buttons are pressed.
+    @SuppressLint("NewApi")
     @Override
     public void onClick(View view) {
         // Use switch statement to determine which button was clicked
@@ -159,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if(!patient_age.isEmpty() && !patient_name.isEmpty() && !patient_id.isEmpty()) {
                     String tablename = patient_name + "_" + patient_id + "_" + patient_age + "_" + sex;
                     dbHandler.createPatientTable(tablename);
-                    SLS.setDbName(tablename);
+                    SensorlistnerService.setDbName(tablename);
                     //debug to maker sure entries exist in database
                     //findPatient(1,2,3,4);//show how this works
                     debugText.setText("Starting Service");
@@ -268,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         addData(lastPlotted_x, local_arr, new DataPoint(xMax, X), mSeries_x);
                         addData(lastPlotted_y, local_arr, new DataPoint(xMax, Y), mSeries_y);
                         addData(lastPlotted_z, local_arr, new DataPoint(xMax, Z), mSeries_z);
-                        handler_obj.postDelayed(this, 20);
+                        handler_obj.postDelayed(this, 1000);
                     }
                     void addData(ArrayList<DataPoint> lastPlotted, DataPoint[] dataPoint_arr,
                                    DataPoint newData, LineGraphSeries<DataPoint> mSeries) {
@@ -278,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 };
                 //call this thread at specified interval so new values will be added continuously
-                handler_obj.postDelayed(runnable_obj, 20);
+                handler_obj.postDelayed(runnable_obj, 1000);
             }
         }
     }
