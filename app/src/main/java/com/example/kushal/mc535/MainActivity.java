@@ -189,7 +189,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.download_button:
 
-                // Later to be moved to ASyncTask.
+
+                /*
+                     Would be better of implemented with asynctask. So we can show download progress.
+                 */
                 Thread downloadThread = new Thread() {
                     public void run() {
                         downLoad(DBHandler.DATABASE_NAME);
@@ -198,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (!downloadThread.isAlive())
                     downloadThread.start();
                 else {
-                    Toast.makeText(this, "Upload in progress! Try after few seconds!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Other Download in already progress! Try after few seconds!", Toast.LENGTH_LONG).show();
                 }
                 break;
 
@@ -218,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (!uploadThread.isAlive())
                         uploadThread.start();
                     else {
-                        Toast.makeText(this, "Upload in progress! Try after few seconds!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Other Upload in progress! Try after few seconds!", Toast.LENGTH_LONG).show();
                     }
                 }
                 break;
@@ -432,6 +435,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+
     public void downLoad(String dbName)
     {
         //To-DO::
@@ -464,6 +468,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 total += count;
                 output.write(data, 0, count);
             }
+
+            //To:DO  TASK C
+            /*
+                    @ashni
+                    When download finishes. Fetch the last 10 timestamp values from the downloaded database
+                    And pass those readings to Josh's Function so that they could be plotted on the graph.
+                    This can be done in asynctask onPostExecute().
+             */
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
