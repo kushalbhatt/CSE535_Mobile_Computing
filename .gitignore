@@ -7,3 +7,6 @@
 /build
 /captures
 .externalNativeBuild
+
+# Ignore video files for the project submission:
+*.mp4
