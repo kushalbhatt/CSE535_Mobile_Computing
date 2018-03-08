@@ -72,7 +72,7 @@ public class SensorlistnerService extends Service implements SensorEventListener
 
             // Pass sensor data to MainActivity class for plotting
             MainActivity.set_sensor_vals(x,y,z);
-
+            //Log.d("x y z",x +" "+ y+" " + z);
             //    Add this readings along with timestamp to the database table
             //    But only if graph is being drawn (Run was pressed.)
             //    Name of database is local variable = current_patient

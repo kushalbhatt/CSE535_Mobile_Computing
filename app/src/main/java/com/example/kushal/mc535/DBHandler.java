@@ -18,7 +18,7 @@ public class DBHandler extends SQLiteOpenHelper {
     //WE need to store db to Eternal SD CARD
     public static final String DATABASE_PATH = Environment.getExternalStorageDirectory()+"/CSE535_ASSIGNMENT2/";
     public static final String DATABASE_NAME = "patientDB.db";
-
+    //public static final String DATABASE_NAME = "group17.db";
     public static String TABLE_NAME = "Name_ID_Age_Sex";
     public static final String COLUMN_TIMESTAMP = "Timestamp";
     public static final String COLUMN_X = "XValues";
@@ -63,6 +63,9 @@ public class DBHandler extends SQLiteOpenHelper {
         values.put(COLUMN_Y, patient.getYValues());
         values.put(COLUMN_Z, patient.getZValues());
         database.insert(TABLE_NAME, null, values);
+        /*ashni*/
+        //TODO
+        //database.close();
     }
     //Use this to check if a timestamp already exists in the database.
     public Patient findHandler(long timestamp) {

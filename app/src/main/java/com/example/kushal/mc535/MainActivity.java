@@ -14,7 +14,11 @@ import java.net.ProtocolException;
 import java.net.URL;
 
 import android.annotation.SuppressLint;
+import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
+import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -36,7 +40,11 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Random;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -158,7 +166,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                  */
                 //input sanity check to avoid errors
                 if(!patient_age.isEmpty() && !patient_name.isEmpty() && !patient_id.isEmpty()) {
+                    //TODO
+                    /*A validation for checking that name starts with alphabet should be made*/
                     String tablename = patient_name + "_" + patient_id + "_" + patient_age + "_" + sex;
+                    //TODO
+                    /*use StringBuilder instead*/
+                    //TODO
+                    /*same method called in sensor class*/
                     dbHandler.createPatientTable(tablename);
                     SensorlistnerService.setDbName(tablename);
                     //debug to maker sure entries exist in database
@@ -189,10 +203,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.download_button:
 
-
                 /*
                      Would be better of implemented with asynctask. So we can show download progress.
                  */
+                //TODO
+                /* use async task instead*/
                 Thread downloadThread = new Thread() {
                     public void run() {
                         downLoad(DBHandler.DATABASE_NAME);
@@ -236,6 +251,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //debug: check if added to database
     //IMPORTANT: Find patient will check to see if an entry for a given timestamp has already been made.
     //if it hasn't been made, it will create a field.
+
+    //TODO
+    /*unnecessary methods and calls*/
     public void findPatient(int timestamp, int x, int y, int z) {
         Patient patient = dbHandler.findHandler(timestamp);
         if (patient != null) {
@@ -272,10 +290,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         addData(lastPlotted_x, local_arr, new DataPoint(xMax, X), mSeries_x);
                         addData(lastPlotted_y, local_arr, new DataPoint(xMax, Y), mSeries_y);
                         addData(lastPlotted_z, local_arr, new DataPoint(xMax, Z), mSeries_z);
-                        handler_obj.postDelayed(this, 1000);
+                        handler_obj.postDelayed(this, 200);
                     }
                     void addData(ArrayList<DataPoint> lastPlotted, DataPoint[] dataPoint_arr,
-                                   DataPoint newData, LineGraphSeries<DataPoint> mSeries) {
+                                 DataPoint newData, LineGraphSeries<DataPoint> mSeries) {
                         mSeries_x.resetData(dataPoint_arr);
                         lastPlotted.add(newData);
                         mSeries.appendData(newData, true, 50);
@@ -442,8 +460,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         InputStream input = null;
         OutputStream output = null;
         HttpURLConnection connection = null;
-
+        SQLiteDatabase database = null;
+        DataPoint[] xVals = new DataPoint[10];
+        DataPoint[] yVals = new DataPoint[10];
+        DataPoint[] zVals = new DataPoint[10];
         try {
+            Log.d("database name",dbName+"");
             URL url = new URL("http://impact.asu.edu/CSE535Spring18Folder/"+dbName);
             connection = (HttpURLConnection) url.openConnection();
 
@@ -476,6 +498,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     And pass those readings to Josh's Function so that they could be plotted on the graph.
                     This can be done in asynctask onPostExecute().
              */
+
+            database = SQLiteDatabase.openDatabase(Environment.getExternalStorageDirectory().getPath()+"/CSE535_ASSIGNMENT2_DOWN", null, 0);
+            Log.d("no exception","no exception");
+            String patient_id = ((EditText)findViewById(R.id.idText)).getText().toString();
+            String patient_age = ((EditText)findViewById(R.id.ageText)).getText().toString();
+            String patient_name = ((EditText)findViewById(R.id.nameText)).getText().toString();
+            String sex = "Male";
+            int checked = ((RadioGroup)findViewById(R.id.rg1)).getCheckedRadioButtonId();
+            if (checked == R.id.female)
+                sex = "Female";
+            String tableName = patient_name + "_" + patient_id + "_" + patient_age + "_" + sex;
+            String query = "Select * from "+ tableName+ " ORDER BY TIMESTAMP DESC limit 10";
+            try{
+                Cursor cursor = database.rawQuery(query, null);
+                int i=0;
+                int j=10;
+                if (cursor.moveToFirst() ){
+                    do{
+                        i++;
+                        j--;
+                        String x = cursor.getString(cursor.getColumnIndex("XValues"));
+                        String y = cursor.getString(cursor.getColumnIndex("YValues"));
+                        String z = cursor.getString(cursor.getColumnIndex("ZValues"));
+                        DataPoint xval = new DataPoint(Double.parseDouble(x),i);
+                        DataPoint yval = new DataPoint(Double.parseDouble(y),i);
+                        DataPoint zval = new DataPoint(Double.parseDouble(z),i);
+                        xVals[j] = xval;
+                        yVals[j] =yval;
+                        zVals[j] = zval;
+                        Log.d("getting x y z"," "+x+" "+y+" "+z);
+                    }while (cursor.moveToNext());
+                }
+                Log.d("xarr",xVals+"");
+                Log.d("yarr",yVals+"");
+                Log.d("zarr",zVals+"");
+                //TODO
+            /*use three arrays to plot graphseries*/
+            }
+            catch(SQLiteException e){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(),"Records for this person does not exist",Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            }
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
