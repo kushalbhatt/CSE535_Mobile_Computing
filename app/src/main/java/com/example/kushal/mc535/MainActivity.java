@@ -55,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final Handler handler_obj = new Handler();
     private Runnable runnable_obj;
     public double xMax;
+
+
     public int runCount = 0;
     Button run_button_var, stop_button_var, download_button_var, upload_button_var;
     static TextView debugText;
@@ -72,9 +74,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Z = z;
     }
 
+    // Number of data-points to graph
+    int num_data_points = 10;
+    int min_index = 0;
+    int max_index = num_data_points - 1;
+    int delay_val = 1000;
+
+    // Counter to display only ten datapoints
+    int times_through_run_func;
+
     // Graphing stuffs
-    GraphView graph_X, graph_Y, graph_Z;
-    private LineGraphSeries<DataPoint> mSeries_x, mSeries_y, mSeries_z;
+    GraphView graph;
+    private LineGraphSeries<DataPoint> lineGraphSeries_x, lineGraphSeries_y, lineGraphSeries_z, lineGraphSeries_1, lineGraphSeries_2;
+
     public ArrayList<DataPoint> lastPlotted_x = new ArrayList<DataPoint>();
     public ArrayList<DataPoint> lastPlotted_y = new ArrayList<DataPoint>();
     public ArrayList<DataPoint> lastPlotted_z = new ArrayList<DataPoint>();
@@ -85,36 +97,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Initialize the view.
         initView();
-        graph_X = (GraphView) findViewById(R.id.graph_X_id);
-        graph_Y = (GraphView) findViewById(R.id.graph_Y_id);
-        graph_Z = (GraphView) findViewById(R.id.graph_Z_id);
+        graph = (GraphView) findViewById(R.id.graph_id);
 
         //initial graph random values
-        mSeries_x = new LineGraphSeries<>(generateData(0));
-        mSeries_y = new LineGraphSeries<>(generateData(1));
-        mSeries_z = new LineGraphSeries<>(generateData(2));
+        lineGraphSeries_x = new LineGraphSeries<>(initializeData(0));
+        lineGraphSeries_y = new LineGraphSeries<>(initializeData(1));
+        lineGraphSeries_z = new LineGraphSeries<>(initializeData(2));
 
-        initialize_graph(graph_X, mSeries_x, Color.BLUE, "x", 15);
-        initialize_graph(graph_Y, mSeries_y, Color.GREEN, "y", 15);
-        initialize_graph(graph_Z, mSeries_z, Color.RED, "z", 20);
+        initializeGraph(graph, lineGraphSeries_x, Color.BLUE,  "x", 15);
+        initializeGraph(graph, lineGraphSeries_y, Color.GREEN, "y", 15);
+        initializeGraph(graph, lineGraphSeries_z, Color.RED, "z", 15);
+
+        // Initialize number of run itterations
+        times_through_run_func = 0;
 
         //initialize the db helper
         //dbHelper = new DatabaseHelper(this);
     }
+    private DataPoint[] initializeData( int axis_choice ) {
 
-    private void initialize_graph(GraphView graph,
-                                  LineGraphSeries<DataPoint> mSeries,
-                                  int color, String title, int yBounds) {
-        mSeries.setColor(color);
-        graph.addSeries(mSeries);
+        DataPoint[] values = new DataPoint[num_data_points];
+        for (int x = 0; x < num_data_points; x++)
+        {
+
+            values[x] = new DataPoint(x, 0);
+            if (axis_choice == 0)      { lastPlotted_x.add( values[x] ); }
+            else if (axis_choice == 1) { lastPlotted_y.add( values[x] ); }
+            else if (axis_choice == 2) { lastPlotted_z.add( values[x] ); }
+        }
+        return values;
+    }
+    //===========================================
+    private void initializeGraph(GraphView graph,
+                                 LineGraphSeries<DataPoint> lineGraphSeries,
+                                 int color, String title, int yBounds) {
+        lineGraphSeries.setColor(color);
+        graph.addSeries(lineGraphSeries);
         graph.getViewport().setBackgroundColor(Color.BLACK);
         graph.setTitle(title);
         graph.setTitleColor(Color.BLUE);
         graph.setTitleTextSize(50);
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getViewport().setYAxisBoundsManual(true);
-        graph.getViewport().setMinX(0);
-        graph.getViewport().setMaxX(30);
+        graph.getViewport().setMinX(min_index);
+        graph.getViewport().setMaxX(max_index);
         graph.getViewport().setMinY(-yBounds);
         graph.getViewport().setMaxY(yBounds);
     }
@@ -148,7 +174,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Use switch statement to determine which button was clicked
         switch (view.getId()) {
             case R.id.run_button:
+
                 pause_flag = false;
+
+                // When run button is pressed reset the counter
+                times_through_run_func = 0;
+
+
                 runCount++;
                 /*
                     fetch patient data
@@ -192,8 +224,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.stop_button:
-                pause_flag = true;
+
+                // CHANGED THIS:
+                pause_flag = false;
                 runCount = 0;
+
+                // RESET THE COUNTER
+                times_through_run_func = 0;
+
+
+
                 /* Optional :
                     Erase Input Boxes for fresh entry
                  */
@@ -252,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //IMPORTANT: Find patient will check to see if an entry for a given timestamp has already been made.
     //if it hasn't been made, it will create a field.
 
-    //TODO
+    // TODO
     /*unnecessary methods and calls*/
     public void findPatient(int timestamp, int x, int y, int z) {
         Patient patient = dbHandler.findHandler(timestamp);
@@ -270,37 +310,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void running(boolean pause_flag) {
         // Check to see if pause_flag has been set, if not, then draw graph
         if (pause_flag) {
-            mSeries_x.resetData(new DataPoint[0]);
+            // Clear graph when paused
+            lineGraphSeries_x.resetData(new DataPoint[0]);
             handler_obj.removeCallbacks(runnable_obj);
         } else {
-            if (runCount == 1) {
 
-                // Thread
-                runnable_obj = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        int j = 29;
-                        //copy previously plotted values to temp array
-                        DataPoint[] local_arr = new DataPoint[30];
-                        for(int i=(int)xMax;i>(int)xMax-30;i--,j--){
-                            local_arr[j]=lastPlotted_x.get(i);
-                        }
-                        xMax++;
-                        addData(lastPlotted_x, local_arr, new DataPoint(xMax, X), mSeries_x);
-                        addData(lastPlotted_y, local_arr, new DataPoint(xMax, Y), mSeries_y);
-                        addData(lastPlotted_z, local_arr, new DataPoint(xMax, Z), mSeries_z);
-                        handler_obj.postDelayed(this, 200);
-                    }
-                    void addData(ArrayList<DataPoint> lastPlotted, DataPoint[] dataPoint_arr,
-                                 DataPoint newData, LineGraphSeries<DataPoint> mSeries) {
-                        mSeries_x.resetData(dataPoint_arr);
-                        lastPlotted.add(newData);
-                        mSeries.appendData(newData, true, 50);
-                    }
-                };
-                //call this thread at specified interval so new values will be added continuously
-                handler_obj.postDelayed(runnable_obj, 1000);
+            Toast.makeText(this, "DEBUG - JOSH", Toast.LENGTH_LONG).show();
+            for (int i = 0; i < 10; i++) {
+                max_index++;
+                lineGraphSeries_x.appendData(new DataPoint(max_index, X), true, 50);
+                lineGraphSeries_y.appendData(new DataPoint(max_index, Y), true, 50);
+                lineGraphSeries_z.appendData(new DataPoint(max_index, Z), true, 50);
+                handler_obj.postDelayed(runnable_obj, 100);
             }
         }
     }
@@ -335,21 +356,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         handler_obj.removeCallbacks(runnable_obj);
         //sensorManager.unregisterListener(this);
         super.onPause();
-    }
-
-    private DataPoint[] generateData( int axis_choice ) {
-        int count = 30;
-        DataPoint[] values = new DataPoint[count];
-        for (int x = 0; x < count; x++)
-        {
-            xMax = x;
-            DataPoint z = new DataPoint(x, 0);
-            values[x] = z;
-            if (axis_choice == 0)      { lastPlotted_x.add(z); }
-            else if (axis_choice == 1) { lastPlotted_y.add(z); }
-            else if (axis_choice == 2) { lastPlotted_z.add(z); }
-        }
-        return values;
     }
 
     @Override
@@ -452,7 +458,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     }
-
 
     public void downLoad(String dbName)
     {

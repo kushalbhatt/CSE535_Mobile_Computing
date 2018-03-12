@@ -119,28 +119,11 @@
     <com.jjoe64.graphview.GraphView
         android:layout_width="match_parent"
         android:layout_height="150dip"
-        android:id="@+id/graph_X_id"
+        android:id="@+id/graph_id"
         android:layout_below="@+id/rg1"
         android:layout_marginTop="15dp"
         android:layout_alignParentStart="true"
         />
-    <com.jjoe64.graphview.GraphView
-        android:layout_width="match_parent"
-        android:layout_height="150dip"
-        android:id="@+id/graph_Y_id"
-        android:layout_below="@+id/rg1"
-        android:layout_marginTop="165dp"
-        android:layout_alignParentStart="true"
-        />
-    <com.jjoe64.graphview.GraphView
-        android:layout_width="match_parent"
-        android:layout_height="150dip"
-        android:id="@+id/graph_Z_id"
-        android:layout_below="@+id/rg1"
-        android:layout_marginTop="315dp"
-        android:layout_alignParentStart="true"
-        />
-
 
     <TextView
         android:id="@+id/debug"
