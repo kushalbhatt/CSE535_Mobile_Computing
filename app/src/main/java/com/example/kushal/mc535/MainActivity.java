@@ -51,7 +51,12 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     //Create these global variables to be accesses between methods within the MainActivity class.
+
+
     static boolean pause_flag = false; // Status flag for pausing
+    static boolean download_flag = false; // Status flag for downloading
+
+
     private final Handler handler_obj = new Handler();
     private Runnable runnable_obj;
     public double xMax;
@@ -217,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     startService(sensorService);
 
                     //we might not need running. As now we have actual sensordata and not the random data
-                    running(pause_flag);
+                    running(pause_flag, download_flag);
                 }
                 else {
                     Toast.makeText(this, "Please input all the patient info. Try again!", Toast.LENGTH_LONG).show();
@@ -226,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.stop_button:
 
                 // CHANGED THIS:
-                pause_flag = false;
+                pause_flag = true;
                 runCount = 0;
 
                 // RESET THE COUNTER
@@ -239,9 +244,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                  */
 
                 //we might not need running. As now we have actual sensordata and not the random data
-                running(pause_flag);
+                running(pause_flag, download_flag);
                 break;
             case R.id.download_button:
+
+
+                // JOSH:
+                download_flag = true;
+                running(pause_flag, download_flag);
 
                 /*
                      Would be better of implemented with asynctask. So we can show download progress.
@@ -254,7 +264,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 };
                 if (!downloadThread.isAlive())
+                {
+
                     downloadThread.start();
+                }
+
                 else {
                     Toast.makeText(this, "Other Download in already progress! Try after few seconds!", Toast.LENGTH_LONG).show();
                 }
@@ -307,24 +321,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    public void running(boolean pause_flag) {
+    public void running(boolean pause_flag, boolean download_flag) {
         // Check to see if pause_flag has been set, if not, then draw graph
-        if (pause_flag) {
-            // Clear graph when paused
-            lineGraphSeries_x.resetData(new DataPoint[0]);
-            handler_obj.removeCallbacks(runnable_obj);
-        } else {
 
-            Toast.makeText(this, "DEBUG - JOSH", Toast.LENGTH_LONG).show();
-            for (int i = 0; i < 10; i++) {
-                max_index++;
-                lineGraphSeries_x.appendData(new DataPoint(max_index, X), true, 50);
-                lineGraphSeries_y.appendData(new DataPoint(max_index, Y), true, 50);
-                lineGraphSeries_z.appendData(new DataPoint(max_index, Z), true, 50);
-                handler_obj.postDelayed(runnable_obj, 100);
+        if (download_flag)
+        {
+            Toast.makeText(this, "DOWNLOAD STATE", Toast.LENGTH_LONG).show();
+        }
+        else
+        {
+            if (pause_flag)
+            { // In PAUSED state
+                Toast.makeText(this, "PAUSED STATE", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(this, "RUNNING STATE", Toast.LENGTH_LONG).show();
             }
         }
     }
+    public void append_func(DataPoint dataPoint_x, DataPoint dataPoint_y, DataPoint dataPoint_z)
+    {
+        lineGraphSeries_x.appendData(new DataPoint(max_index, X), true, 50);
+        lineGraphSeries_y.appendData(new DataPoint(max_index, Y), true, 50);
+        lineGraphSeries_z.appendData(new DataPoint(max_index, Z), true, 50);
+        handler_obj.postDelayed(runnable_obj, 100);
+    }
+
+
 
     public void initView() {
         setContentView(R.layout.activity_main);
