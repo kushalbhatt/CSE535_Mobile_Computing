@@ -57,6 +57,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     static boolean download_flag = false; // Status flag for downloading
 
 
+    DataPoint[] xVals = new DataPoint[10];
+    DataPoint[] yVals = new DataPoint[10];
+    DataPoint[] zVals = new DataPoint[10];
+
+    float[] X_ARRAY = new float[10];
+    float[] Y_ARRAY = new float[10];
+    float[] Z_ARRAY = new float[10];
+
+
     private final Handler handler_obj = new Handler();
     private Runnable runnable_obj;
     public double xMax;
@@ -116,6 +125,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Initialize number of run itterations
         times_through_run_func = 0;
 
+        // INITIALIZE
+        for (int idx = 0; idx < 10; idx++)
+            X_ARRAY[idx] = 0;
+
         //initialize the db helper
         //dbHelper = new DatabaseHelper(this);
     }
@@ -149,6 +162,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         graph.getViewport().setMinY(-yBounds);
         graph.getViewport().setMaxY(yBounds);
     }
+    //===========================================
+    private void setData(int idx, int x, int y, int z)
+    {
+        xVals[idx] = new DataPoint(idx,x);
+        yVals[idx] = new DataPoint(idx,y);
+        zVals[idx] = new DataPoint(idx,z);
+    }
+    //===========================================
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -221,8 +242,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     sensorService.putExtra("table_name",tablename);
                     startService(sensorService);
 
-                    //we might not need running. As now we have actual sensordata and not the random data
-                    running(pause_flag, download_flag);
+
+
+                    for (int idx = 0; idx < 10; idx++)
+                    {
+                        X_ARRAY[idx] = idx;
+                        Y_ARRAY[idx] = -idx;
+                        Z_ARRAY[idx] = idx - 10;
+                    }
+                    graphData(pause_flag, download_flag, X_ARRAY, Y_ARRAY, Z_ARRAY);
+
                 }
                 else {
                     Toast.makeText(this, "Please input all the patient info. Try again!", Toast.LENGTH_LONG).show();
@@ -243,35 +272,68 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Erase Input Boxes for fresh entry
                  */
 
-                //we might not need running. As now we have actual sensordata and not the random data
-                running(pause_flag, download_flag);
+
+                for (int idx = 0; idx < 10; idx++)
+                {
+                    X_ARRAY[idx] = idx;
+                    Y_ARRAY[idx] = -idx;
+                    Z_ARRAY[idx] = idx - 10;
+                }
+                graphData(pause_flag, download_flag, X_ARRAY, Y_ARRAY, Z_ARRAY);
+
                 break;
             case R.id.download_button:
 
-
-                // JOSH:
-                download_flag = true;
-                running(pause_flag, download_flag);
 
                 /*
                      Would be better of implemented with asynctask. So we can show download progress.
                  */
                 //TODO
                 /* use async task instead*/
+
+
+                // JOSH: - Set into DOWNLOADING STATE
+                download_flag = true;
+
+                for (int idx = 0; idx < 10; idx++)
+                {
+                    X_ARRAY[idx] = idx;
+                    Y_ARRAY[idx] = -idx;
+                    Z_ARRAY[idx] = idx - 10;
+                }
+                graphData(pause_flag, download_flag, X_ARRAY, Y_ARRAY, Z_ARRAY);
+
+
+                // ASHNI's DOWNLOAD CODE
+                // ASHNI's DOWNLOAD CODE
+                // ASHNI's DOWNLOAD CODE
+                // ASHNI's DOWNLOAD CODE
+                // ASHNI's DOWNLOAD CODE
+                // ASHNI's DOWNLOAD CODE
+                /*
                 Thread downloadThread = new Thread() {
                     public void run() {
+
+                        // CODE IN HERE IS SEQUENTIAL - is all code in download() waited on - I think not
+
+                        // WHY IS THIS NOT WORKING?
+                        // JOSH: - Set into DOWNLOADING STATE
+                        //download_flag = true;
+                        //graphData(pause_flag, download_flag);
+
                         downLoad(DBHandler.DATABASE_NAME);
+
                     }
                 };
                 if (!downloadThread.isAlive())
                 {
-
                     downloadThread.start();
                 }
-
                 else {
                     Toast.makeText(this, "Other Download in already progress! Try after few seconds!", Toast.LENGTH_LONG).show();
                 }
+                */
+
                 break;
 
             case R.id.upload_button:
@@ -321,12 +383,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    public void running(boolean pause_flag, boolean download_flag) {
+    public void graphData(boolean pause_flag, boolean download_flag, float[] X_ARRAY, float[] Y_ARRAY, float[] Z_ARRAY) {
         // Check to see if pause_flag has been set, if not, then draw graph
 
         if (download_flag)
         {
             Toast.makeText(this, "DOWNLOAD STATE", Toast.LENGTH_LONG).show();
+
+            // Get Downloaded Data:
+            for (int idx = 0; idx < 10; idx++)
+             {
+                max_index++;
+                //setData(idx, 5, -10, 12);
+                append_data(max_index, X_ARRAY[idx], Y_ARRAY[idx], Z_ARRAY[idx]);
+            }
+
         }
         else
         {
@@ -340,11 +411,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
-    public void append_func(DataPoint dataPoint_x, DataPoint dataPoint_y, DataPoint dataPoint_z)
+    public void append_data(int index, float x, float y, float z)
     {
-        lineGraphSeries_x.appendData(new DataPoint(max_index, X), true, 50);
-        lineGraphSeries_y.appendData(new DataPoint(max_index, Y), true, 50);
-        lineGraphSeries_z.appendData(new DataPoint(max_index, Z), true, 50);
+        //lineGraphSeries_x.appendData(new DataPoint(max_index, X), true, 50);
+        lineGraphSeries_x.appendData(new DataPoint(index, x), true, 50);
+        lineGraphSeries_y.appendData(new DataPoint(index, y), true, 50);
+        lineGraphSeries_z.appendData(new DataPoint(index, z), true, 50);
         handler_obj.postDelayed(runnable_obj, 100);
     }
 
@@ -485,14 +557,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void downLoad(String dbName)
     {
+
         //To-DO::
         InputStream input = null;
         OutputStream output = null;
         HttpURLConnection connection = null;
         SQLiteDatabase database = null;
-        DataPoint[] xVals = new DataPoint[10];
-        DataPoint[] yVals = new DataPoint[10];
-        DataPoint[] zVals = new DataPoint[10];
+
         try {
             Log.d("database name",dbName+"");
             URL url = new URL("http://impact.asu.edu/CSE535Spring18Folder/"+dbName);
@@ -553,9 +624,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         DataPoint xval = new DataPoint(Double.parseDouble(x),i);
                         DataPoint yval = new DataPoint(Double.parseDouble(y),i);
                         DataPoint zval = new DataPoint(Double.parseDouble(z),i);
-                        xVals[j] = xval;
-                        yVals[j] =yval;
-                        zVals[j] = zval;
+
+
+                        // DEBUG
+                        // DEBUG
+                        // DEBUG
+                        // DEBUG
+                        // DEBUG
+                        // DEBUG
+                        //xVals[j] = xval;
+                        //yVals[j] = yval;
+                        //zVals[j] = zval;
+                        xVals[j] = new DataPoint(Double.parseDouble(x),5);
+                        yVals[j] = new DataPoint(Double.parseDouble(x),5);
+                        zVals[j] = new DataPoint(Double.parseDouble(x),5);
+
+
+
+
+
                         Log.d("getting x y z"," "+x+" "+y+" "+z);
                     }while (cursor.moveToNext());
                 }
@@ -563,7 +650,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d("yarr",yVals+"");
                 Log.d("zarr",zVals+"");
                 //TODO
-            /*use three arrays to plot graphseries*/
+
+                // JOSH
+                // JOSH
+                // JOSH
+                // JOSH
+                // JOSH
+                // JOSH
+                // JOSH
+                // JOSH
+                /*use three arrays to plot graphseries*/
+
+
+
+
             }
             catch(SQLiteException e){
                 runOnUiThread(new Runnable() {
