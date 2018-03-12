@@ -282,6 +282,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 graphData(pause_flag, download_flag, X_ARRAY, Y_ARRAY, Z_ARRAY);
 
                 break;
+
+
             case R.id.download_button:
 
 
@@ -294,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 // JOSH: - Set into DOWNLOADING STATE
                 download_flag = true;
-
+                pause_flag = true;
                 for (int idx = 0; idx < 10; idx++)
                 {
                     X_ARRAY[idx] = idx;
@@ -390,7 +392,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             Toast.makeText(this, "DOWNLOAD STATE", Toast.LENGTH_LONG).show();
 
-            // Get Downloaded Data:
+            pause_graph();
+
+            // Plot Downloaded Data - SYNTHETIC DEBUGGING DATA
             for (int idx = 0; idx < 10; idx++)
              {
                 max_index++;
@@ -404,10 +408,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (pause_flag)
             { // In PAUSED state
                 Toast.makeText(this, "PAUSED STATE", Toast.LENGTH_LONG).show();
+                pause_graph();;
             }
-            else
+            else // in RUNNING state
             {
                 Toast.makeText(this, "RUNNING STATE", Toast.LENGTH_LONG).show();
+
+
+
+                // DROPPED IN THIS CODE!!!!!!!!!!!!!!
+                // DROPPED IN THIS CODE!!!!!!!!!!!!!!
+                // DROPPED IN THIS CODE!!!!!!!!!!!!!!
+                // DROPPED IN THIS CODE!!!!!!!!!!!!!!
+                // DROPPED IN THIS CODE!!!!!!!!!!!!!!
+                // DROPPED IN THIS CODE!!!!!!!!!!!!!!
+                // DROPPED IN THIS CODE!!!!!!!!!!!!!!
+                // DROPPED IN THIS CODE!!!!!!!!!!!!!!
+
+                //if (runCount == 1) { // Check to ensure thread is only launched once
+
+                    // Thread
+                    runnable_obj = new Runnable() {
+
+                        @Override
+                        public void run() {
+
+                            max_index++;
+                            lineGraphSeries_x.appendData(new DataPoint(max_index, X), true, 50);
+                            lineGraphSeries_y.appendData(new DataPoint(max_index, Y), true, 50);
+                            lineGraphSeries_z.appendData(new DataPoint(max_index, Z), true, 50);
+                            handler_obj.postDelayed(this, 10);
+                        }
+                    };
+                    //call this thread at specified interval so new values will be added continuously
+                    handler_obj.postDelayed(runnable_obj, delay_val);
+
+                //}
+                // END DROPPED IN CODE
+                // END DROPPED IN CODE
+                // END DROPPED IN CODE
+                // END DROPPED IN CODE
+                // END DROPPED IN CODE
+                // END DROPPED IN CODE
+
+
+
             }
         }
     }
@@ -418,6 +463,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         lineGraphSeries_y.appendData(new DataPoint(index, y), true, 50);
         lineGraphSeries_z.appendData(new DataPoint(index, z), true, 50);
         handler_obj.postDelayed(runnable_obj, 100);
+    }
+    public void pause_graph()
+    {
+        //lineGraphSeries_x.resetData(new DataPoint[0]);
+        handler_obj.removeCallbacks(runnable_obj);
     }
 
 
