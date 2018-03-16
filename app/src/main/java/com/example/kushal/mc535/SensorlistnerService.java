@@ -67,9 +67,6 @@ public class SensorlistnerService extends Service implements SensorEventListener
 
         if(!MainActivity.pause_flag)
         {
-            // DEBUG:
-            //MainActivity.debugText.setText(x+" "+y+" "+z);
-
             // Pass sensor data to MainActivity class for plotting
             MainActivity.set_sensor_vals(x,y,z);
             //Log.d("x y z",x +" "+ y+" " + z);

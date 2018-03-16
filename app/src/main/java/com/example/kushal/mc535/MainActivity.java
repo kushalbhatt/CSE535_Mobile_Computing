@@ -304,8 +304,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 /*
                      Would be better of implemented with asynctask. So we can show download progress.
                  */
-                //TODO
-                /* use async task instead*/
+                /*TODO::  use async task for download code instead of a normal thread
+                         Call  graphdata() with 10 datapoints fetched from the server in onPostExecute()*/
 
                 /*
 
@@ -351,8 +351,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             uploadDataBase();
                         }
                     };
-                    if (!uploadThread.isAlive())
+                    if (!uploadThread.isAlive()) {
+                        Toast.makeText(this, "Uploading the data to server.", Toast.LENGTH_LONG).show();
                         uploadThread.start();
+                    }
                     else {
                         Toast.makeText(this, "Other Upload in progress! Try after few seconds!", Toast.LENGTH_LONG).show();
                     }
@@ -463,15 +465,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onResume() {
         if(pause_flag==false)
             handler_obj.postDelayed(runnable_obj, 300);
-        //if(accelerometer!=null)
-        //    sensorManager.registerListener(this,accelerometer,sensor_sampling_rate);
         super.onResume();
     }
 
     @Override
     public void onPause() {
         handler_obj.removeCallbacks(runnable_obj);
-        //sensorManager.unregisterListener(this);
         super.onPause();
     }
 
