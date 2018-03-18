@@ -19,6 +19,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.icu.text.SimpleDateFormat;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -58,9 +59,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public int runCount = 0;
 
     // Used in Ashni's download method
-    DataPoint[] xVals = new DataPoint[10];
-    DataPoint[] yVals = new DataPoint[10];
-    DataPoint[] zVals = new DataPoint[10];
+    float[] xVals = new float[10];
+    float[] yVals = new float[10];
+    float[] zVals = new float[10];
 
     // Used to plot 10 datapoints
     float[] X_ARRAY = new float[10];
@@ -160,12 +161,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         graph.getViewport().setMaxY(yBounds);
     }
     //===========================================
-    private void setData(int idx, float x, float y, float z)
-    {
-        xVals[idx] = new DataPoint(idx,x);
-        yVals[idx] = new DataPoint(idx,y);
-        zVals[idx] = new DataPoint(idx,z);
-    }
+
     //===========================================
 
     @Override
@@ -275,15 +271,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // SYNTHETIC DEBUGGING DATA
                 // SYNTHETIC DEBUGGING DATA
                 // SYNTHETIC DEBUGGING DATA
-                for (int idx = 0; idx < 10; idx++)
-                {
-                    X_ARRAY[idx] = idx;
-                    Y_ARRAY[idx] = -idx;
-                    Z_ARRAY[idx] = idx - 10;
-                }
-
-                // Graph it
-                graphData(pause_flag, download_flag, X_ARRAY, Y_ARRAY, Z_ARRAY);
+//                for (int idx = 0; idx < 10; idx++)
+//                {
+//                    X_ARRAY[idx] = idx;
+//                    Y_ARRAY[idx] = -idx;
+//                    Z_ARRAY[idx] = idx - 10;
+//                }
+//
+//                // Graph it
+//                graphData(pause_flag, download_flag, X_ARRAY, Y_ARRAY, Z_ARRAY);
 
                 //~~~~~~~~~~~~
                 //~~~~JOSH~~~~
@@ -335,7 +331,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 -- END DEBUG
                 -- END DEBUG -- Uncomment out the above block to use download method
                 */
-
+                download d = new download();
+                d.execute("");
                 break;
 
             case R.id.upload_button:
@@ -575,117 +572,121 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void downLoad(String dbName)
-    {
-
-        //To-DO::
-        InputStream input = null;
-        OutputStream output = null;
-        HttpURLConnection connection = null;
-        SQLiteDatabase database = null;
-
-        try {
-            Log.d("database name",dbName+"");
-            URL url = new URL("http://impact.asu.edu/CSE535Spring18Folder/"+dbName);
-            connection = (HttpURLConnection) url.openConnection();
-
-            connection.connect();
-
-            // expect HTTP 200 OK, so we don't mistakenly save error report
-            // instead of the file
-            if (connection.getResponseCode() != HttpsURLConnection.HTTP_OK) {
-                Log.d("KUSHAL","Server returned HTTP " + connection.getResponseCode()+ " " + connection.getResponseMessage());
-                return;
-            }
-
-            int fileLength = connection.getContentLength();
-            Log.d("KUSHAL","Download File length:: "+fileLength);
-
-            input = connection.getInputStream();
-            output = new FileOutputStream(Environment.getExternalStorageDirectory().getPath()+"/CSE535_ASSIGNMENT2_DOWN");
-            byte data[] = new byte[4096];
-            long total = 0;
-            int count;
-            while ((count = input.read(data)) != -1) {
-                total += count;
-                output.write(data, 0, count);
-            }
-
-            //To:DO  TASK C
-            /*
-                    @ashni
-                    When download finishes. Fetch the last 10 timestamp values from the downloaded database
-                    And pass those readings to Josh's Function so that they could be plotted on the graph.
-                    This can be done in asynctask onPostExecute().
-             */
-
-            database = SQLiteDatabase.openDatabase(Environment.getExternalStorageDirectory().getPath()+"/CSE535_ASSIGNMENT2_DOWN", null, 0);
-            Log.d("no exception","no exception");
-            String patient_id = ((EditText)findViewById(R.id.idText)).getText().toString();
-            String patient_age = ((EditText)findViewById(R.id.ageText)).getText().toString();
-            String patient_name = ((EditText)findViewById(R.id.nameText)).getText().toString();
-            String sex = "Male";
-            int checked = ((RadioGroup)findViewById(R.id.rg1)).getCheckedRadioButtonId();
-            if (checked == R.id.female)
-                sex = "Female";
-            String tableName = patient_name + "_" + patient_id + "_" + patient_age + "_" + sex;
-            String query = "Select * from "+ tableName+ " ORDER BY TIMESTAMP DESC limit 10";
-            try{
-                Cursor cursor = database.rawQuery(query, null);
-                int i=0;
-                int j=10;
-                if (cursor.moveToFirst() ){
-                    do{
-                        i++;
-                        j--;
-                        String x = cursor.getString(cursor.getColumnIndex("XValues"));
-                        String y = cursor.getString(cursor.getColumnIndex("YValues"));
-                        String z = cursor.getString(cursor.getColumnIndex("ZValues"));
-                        DataPoint xval = new DataPoint(Double.parseDouble(x),i);
-                        DataPoint yval = new DataPoint(Double.parseDouble(y),i);
-                        DataPoint zval = new DataPoint(Double.parseDouble(z),i);
-
-                        xVals[j] = xval;
-                        yVals[j] = yval;
-                        zVals[j] = zval;
 
 
-                        Log.d("getting x y z"," "+x+" "+y+" "+z);
-                    }while (cursor.moveToNext());
+    class download extends AsyncTask<String, Void, String>{
+
+        @Override
+        protected String doInBackground(String... strings) {
+            //To-DO::
+            InputStream input = null;
+            OutputStream output = null;
+            HttpURLConnection connection = null;
+            SQLiteDatabase database = null;
+
+            try {
+                Log.d("database name",DBHandler.DATABASE_NAME+"");
+                URL url = new URL("http://impact.asu.edu/CSE535Spring18Folder/"+DBHandler.DATABASE_NAME);
+                connection = (HttpURLConnection) url.openConnection();
+
+                connection.connect();
+
+                // expect HTTP 200 OK, so we don't mistakenly save error report
+                // instead of the file
+                if (connection.getResponseCode() != HttpsURLConnection.HTTP_OK) {
+                    Log.d("KUSHAL","Server returned HTTP " + connection.getResponseCode()+ " " + connection.getResponseMessage());
+                    return null;
                 }
-                Log.d("xarr",xVals+"");
-                Log.d("yarr",yVals+"");
-                Log.d("zarr",zVals+"");
-                //TODO
+
+                int fileLength = connection.getContentLength();
+                Log.d("KUSHAL","Download File length:: "+fileLength);
+
+                input = connection.getInputStream();
+                output = new FileOutputStream(Environment.getExternalStorageDirectory().getPath()+"/CSE535_ASSIGNMENT2_DOWN");
+                byte data[] = new byte[4096];
+                long total = 0;
+                int count;
+                while ((count = input.read(data)) != -1) {
+                    total += count;
+                    output.write(data, 0, count);
+                }
+
+
+                database = SQLiteDatabase.openDatabase(Environment.getExternalStorageDirectory().getPath()+"/CSE535_ASSIGNMENT2_DOWN", null, 0);
+                Log.d("no exception","no exception");
+                String patient_id = ((EditText)findViewById(R.id.idText)).getText().toString();
+                String patient_age = ((EditText)findViewById(R.id.ageText)).getText().toString();
+                String patient_name = ((EditText)findViewById(R.id.nameText)).getText().toString();
+                String sex = "Male";
+                int checked = ((RadioGroup)findViewById(R.id.rg1)).getCheckedRadioButtonId();
+                if (checked == R.id.female)
+                    sex = "Female";
+                String tableName = patient_name + "_" + patient_id + "_" + patient_age + "_" + sex;
+                String query = "Select * from "+ tableName+ " ORDER BY TIMESTAMP DESC limit 10";
+                try{
+                    Cursor cursor = database.rawQuery(query, null);
+                    int i=0;
+                    int j=10;
+                    if (cursor.moveToFirst() ){
+                        do{
+                            i++;
+                            j--;
+                            String x = cursor.getString(cursor.getColumnIndex("XValues"));
+                            String y = cursor.getString(cursor.getColumnIndex("YValues"));
+                            String z = cursor.getString(cursor.getColumnIndex("ZValues"));
+                            Float xval = Float.parseFloat(x);
+                            Float yval = Float.parseFloat(y);
+                            Float zval = Float.parseFloat(z);
+
+                            xVals[j] = xval;
+                            yVals[j] = yval;
+                            zVals[j] = zval;
+
+
+                            Log.d("getting x y z"," "+x+" "+y+" "+z);
+                        }while (cursor.moveToNext());
+                    }
+                    Log.d("xarr",xVals+"");
+                    Log.d("yarr",yVals+"");
+                    Log.d("zarr",zVals+"");
+                    //TODO
 
                 /*use three arrays to plot graphseries*/
 
-            }
-            catch(SQLiteException e){
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(),"Records for this person does not exist",Toast.LENGTH_SHORT).show();
-                    }
-                });
+                }
+                catch(SQLiteException e){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(),"Records for this person does not exist",Toast.LENGTH_SHORT).show();
+                        }
+                    });
 
-            }
+                }
 
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            finally {
+                try {
+                    if (output != null)
+                        output.close();
+                    if (input != null)
+                        input.close();
+                } catch (IOException ignored) {
+                }
+                if (connection != null)
+                    connection.disconnect();
+            }
+            return null;
         }
-        finally {
-            try {
-                if (output != null)
-                    output.close();
-                if (input != null)
-                    input.close();
-            } catch (IOException ignored) {
-            }
-            if (connection != null)
-                connection.disconnect();
+
+        @Override
+        protected void onPostExecute(String s){
+            super.onPostExecute(s);
+            graphData(pause_flag, download_flag, xVals, yVals, zVals);
         }
     }
 }
