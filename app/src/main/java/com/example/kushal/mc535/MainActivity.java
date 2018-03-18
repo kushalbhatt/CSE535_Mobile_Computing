@@ -15,10 +15,8 @@ import java.net.URL;
 
 import android.annotation.SuppressLint;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.icu.text.SimpleDateFormat;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -41,12 +39,7 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Random;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -70,15 +63,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private final Handler handler_obj = new Handler();
     private Runnable runnable_obj;
-    public double xMax;
 
     Button run_button_var, stop_button_var, download_button_var, upload_button_var;
     static TextView debugText;
-    TextView lst;
 
     //private DatabaseHelper dbHelper;
     private DBHandler dbHandler= new DBHandler(this);
-    private long timeStamp;
 
     // Grab sensor data from SensorlistenerService class for plotting
     static float X, Y, Z;
@@ -98,10 +88,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // Graphing stuffs
     GraphView graph;
-    private LineGraphSeries<DataPoint> lineGraphSeries_x, lineGraphSeries_y, lineGraphSeries_z, lineGraphSeries_1, lineGraphSeries_2;
-    public ArrayList<DataPoint> lastPlotted_x = new ArrayList<DataPoint>();
-    public ArrayList<DataPoint> lastPlotted_y = new ArrayList<DataPoint>();
-    public ArrayList<DataPoint> lastPlotted_z = new ArrayList<DataPoint>();
+    private LineGraphSeries<DataPoint> lineGraphSeries_x, lineGraphSeries_y, lineGraphSeries_z;
+    public ArrayList<DataPoint> lastPlotted_x = new ArrayList<>();
+    public ArrayList<DataPoint> lastPlotted_y = new ArrayList<>();
+    public ArrayList<DataPoint> lastPlotted_z = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Initialize the view.
         initView();
-        graph = (GraphView) findViewById(R.id.graph_id);
+        graph = findViewById(R.id.graph_id);
 
         //initial graph random values
         lineGraphSeries_x = new LineGraphSeries<>(initializeData(0));
@@ -212,36 +202,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (checked == R.id.female)
                     sex = "Female";
 
+
+
                 /*
                     Create table if not already for this patient so that we can dump data into it
                  */
                 //input sanity check to avoid errors
-                if(!patient_age.isEmpty() && !patient_name.isEmpty() && !patient_id.isEmpty()) {
-                    //TODO
-                    /*A validation for checking that name starts with alphabet should be made*/
-                    String tablename = patient_name + "_" + patient_id + "_" + patient_age + "_" + sex;
-                    //TODO
+                try{
+                    if(!patient_age.isEmpty() && !patient_name.isEmpty() && !patient_id.isEmpty()) {
+
+                        String tablename = patient_name + "_" + patient_id + "_" + patient_age + "_" + sex;
+                        //testing alternative
                     /*use StringBuilder instead*/
-                    //TODO
-                    /*same method called in sensor class*/
-                    dbHandler.createPatientTable(tablename);
-                    SensorlistnerService.setDbName(tablename);
-                    //debug to maker sure entries exist in database
-                    //findPatient(1,2,3,4);//show how this works
-                    debugText.setText("Starting Service");
-                    //Start the senorlistner to sample accelerometer data
-                    Intent sensorService = new Intent(MainActivity.this,SensorlistnerService.class);
+
+                        dbHandler.createPatientTable(tablename);
+                        SensorlistnerService.setDbName(tablename);
+                        //debug to maker sure entries exist in database
+                        //findPatient(1,2,3,4);//show how this works
+                        debugText.setText("Starting Service");
+                        //Start the senorlistner to sample accelerometer data
+                        Intent sensorService = new Intent(MainActivity.this,SensorlistnerService.class);
                     /*Use Bundle if any data needs to be passed along with this intent*/
-                    sensorService.putExtra("table_name",tablename);
-                    startService(sensorService);
+                        sensorService.putExtra("table_name",tablename);
+                        startService(sensorService);
 
-                    graphData(pause_flag, download_flag, X_ARRAY, Y_ARRAY, Z_ARRAY);
+                        graphData(pause_flag, download_flag, X_ARRAY, Y_ARRAY, Z_ARRAY);
 
+                    }
+                    else {
+                        Toast.makeText(this, "Please input all the patient info. Try again!", Toast.LENGTH_LONG).show();
+                    }
+                    break;
+
+                }catch(Exception e){
+                    Toast.makeText(getApplicationContext(),"Invalid data. Please enter the details correctly.",Toast.LENGTH_SHORT).show();
                 }
-                else {
-                    Toast.makeText(this, "Please input all the patient info. Try again!", Toast.LENGTH_LONG).show();
-                }
-                break;
+
             case R.id.stop_button:
 
                 // Set flags for running/paused/download states
@@ -288,49 +284,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //~~~~~~~~~~~~
                 //~~~~~~~~~~~~
 
-
-                // ASHNI's DOWNLOAD CODE
-                // ASHNI's DOWNLOAD CODE
-                // ASHNI's DOWNLOAD CODE
-                // ASHNI's DOWNLOAD CODE
-                // ASHNI's DOWNLOAD CODE
-                // ASHNI's DOWNLOAD CODE
-                // -- COMMENTED OUT FOR DEBUGGING
-                // -- COMMENTED OUT FOR DEBUGGING
                 /*
                      Would be better of implemented with asynctask. So we can show download progress.
                  */
-                /*TODO::  use async task for download code instead of a normal thread
-                         Call  graphdata() with 10 datapoints fetched from the server in onPostExecute()*/
 
-                /*
-
-
-                Thread downloadThread = new Thread() {
-                    public void run() {
-
-                        // CODE IN HERE IS SEQUENTIAL - is all code in download() waited on - I think not
-
-                        // WHY IS THIS NOT WORKING?
-                        // JOSH: - Set into DOWNLOADING STATE
-                        //download_flag = true;
-                        //graphData(pause_flag, download_flag);
-
-                        downLoad(DBHandler.DATABASE_NAME);
-
-                    }
-                };
-                if (!downloadThread.isAlive())
-                {
-                    downloadThread.start();
-                }
-                else {
-                    Toast.makeText(this, "Other Download in already progress! Try after few seconds!", Toast.LENGTH_LONG).show();
-                }
-
-                -- END DEBUG
-                -- END DEBUG -- Uncomment out the above block to use download method
-                */
+//
+//
+//                Thread downloadThread = new Thread() {
+//                    public void run() {
+//
+//                        // CODE IN HERE IS SEQUENTIAL - is all code in download() waited on - I think not
+//
+//                        // WHY IS THIS NOT WORKING?
+//                        // JOSH: - Set into DOWNLOADING STATE
+//                        //download_flag = true;
+//                        //graphData(pause_flag, download_flag);
+//
+//                        downLoad(DBHandler.DATABASE_NAME);
+//
+//                    }
+//                };
+//                if (!downloadThread.isAlive())
+//                {
+//                    downloadThread.start();
+//                }
+//                else {
+//                    Toast.makeText(this, "Other Download in already progress! Try after few seconds!", Toast.LENGTH_LONG).show();
+//                }
+//
+//                -- END DEBUG
+//                -- END DEBUG -- Uncomment out the above block to use download method
+//                */
                 download d = new download();
                 d.execute("");
                 break;
@@ -359,29 +343,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
-    //
-    public void addPatient(int timestamp, int x, int y, int z){//(String timestamp, String x, String y, String z) {
-        Patient patient = new Patient(timestamp, x, y, z);
-        dbHandler.addHandler(patient);
-    }
-
-    //debug: check if added to database
-    //IMPORTANT: Find patient will check to see if an entry for a given timestamp has already been made.
-    //if it hasn't been made, it will create a field.
-
-    // TODO
-    /*unnecessary methods and calls*/
-    public void findPatient(int timestamp, int x, int y, int z) {
-        Patient patient = dbHandler.findHandler(timestamp);
-        if (patient != null) {
-            //print debug to app
-            Toast.makeText(this, String.valueOf(patient.getTimestamp()) + " " + patient.getXValues() + System.getProperty("line.separator"), Toast.LENGTH_LONG).show();
-        }
-        else {
-            //if the patient isn't in the database, add a patient to the database
-            addPatient(timestamp,x,y,z);
-        }
-    }
 
 
     public void graphData(boolean pause_flag, boolean download_flag, float[] X_ARRAY, float[] Y_ARRAY, float[] Z_ARRAY) {
@@ -404,7 +365,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (pause_flag) // In PAUSED state
             {
                 Toast.makeText(this, "PAUSED STATE", Toast.LENGTH_LONG).show();
-                pause_graph();;
+                pause_graph();
             }
             else // In RUNNING state
             {
@@ -582,7 +543,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             InputStream input = null;
             OutputStream output = null;
             HttpURLConnection connection = null;
-            SQLiteDatabase database = null;
 
             try {
                 Log.d("database name",DBHandler.DATABASE_NAME+"");
@@ -612,7 +572,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
 
-                database = SQLiteDatabase.openDatabase(Environment.getExternalStorageDirectory().getPath()+"/CSE535_ASSIGNMENT2_DOWN", null, 0);
+                SQLiteDatabase database = SQLiteDatabase.openDatabase(Environment.getExternalStorageDirectory().getPath()+"/CSE535_ASSIGNMENT2_DOWN", null, 0);
                 Log.d("no exception","no exception");
                 String patient_id = ((EditText)findViewById(R.id.idText)).getText().toString();
                 String patient_age = ((EditText)findViewById(R.id.ageText)).getText().toString();
@@ -646,13 +606,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Log.d("getting x y z"," "+x+" "+y+" "+z);
                         }while (cursor.moveToNext());
                     }
-                    Log.d("xarr",xVals+"");
-                    Log.d("yarr",yVals+"");
-                    Log.d("zarr",zVals+"");
-                    //TODO
+//                    Log.d("xarr",xVals+"");
+//                    Log.d("yarr",yVals+"");
+//                    Log.d("zarr",zVals+"");
 
-                /*use three arrays to plot graphseries*/
-
+                    cursor.close();
                 }
                 catch(SQLiteException e){
                     runOnUiThread(new Runnable() {
@@ -664,9 +622,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 }
 
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             finally {
