@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.racheldedinsky.group17assignment3.MainActivity">
+
+    <ProgressBar
+        android:id="@+id/progressBarRun"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="180dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="45dp"
+        android:layout_marginTop="47dp"
+        app:layout_constraintBottom_toBottomOf="@+id/progressBarJump"
+        app:layout_constraintEnd_toEndOf="@+id/progressBarJump"
+        app:layout_constraintStart_toStartOf="@+id/progressBarJump"
+        app:layout_constraintTop_toTopOf="@+id/progressBarWalk" />
+    android:max="100"
+
+    <ProgressBar
+        android:id="@+id/progressBarJump"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="180dp"
+        android:layout_height="49dp"
+        android:layout_marginBottom="72dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="73dp"
+        app:layout_constraintBottom_toBottomOf="@+id/test_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/walk"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <ProgressBar
+        android:id="@+id/progressBarWalk"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="180dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="89dp"
+        android:layout_marginTop="90dp"
+        app:layout_constraintBottom_toBottomOf="@+id/jump"
+        app:layout_constraintEnd_toEndOf="@+id/progressBarJump"
+        app:layout_constraintStart_toStartOf="@+id/progressBarJump"
+        app:layout_constraintTop_toTopOf="@+id/rg1" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="2dp"
+        android:layout_marginStart="7dp"
+        android:layout_marginTop="16dp"
+        android:text="Activity:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RadioGroup
+        android:id="@+id/rg1"
+        android:layout_width="180dp"
+        android:layout_height="96dp"
+        android:layout_below="@id/textView"
+        android:layout_marginStart="8dp"
+        android:tooltipText="Sex"
+        app:layout_constraintStart_toStartOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/textView">
+
+        <RadioButton
+            android:id="@+id/walk_radio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Walk" />
+
+        <RadioButton
+            android:id="@+id/run_radio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Run" />
+
+        <RadioButton
+            android:id="@+id/jump_radio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Jump" />
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/train_button"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:text="Train"
+        app:layout_constraintBottom_toTopOf="@+id/progressBarWalk"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/walk"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/rg1"
+        app:layout_constraintTop_toTopOf="@+id/guideline" />
+
+    <TextView
+        android:id="@+id/walk"
+        android:layout_width="140dp"
+        android:layout_height="16dp"
+        android:layout_marginBottom="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Walk"
+        app:layout_constraintBottom_toTopOf="@+id/run"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.517"
+        app:layout_constraintStart_toEndOf="@+id/progressBarWalk"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/run"
+        android:layout_width="93dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="40dp"
+        android:text="Run"
+        app:layout_constraintBottom_toTopOf="@+id/jump"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.333"
+        app:layout_constraintStart_toEndOf="@+id/progressBarRun" />
+
+    <TextView
+        android:id="@+id/jump"
+        android:layout_width="138dp"
+        android:layout_height="21dp"
+        android:layout_marginBottom="219dp"
+        android:text="Jump"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/progressBarJump" />
+
+    <Button
+        android:id="@+id/test_button"
+        android:layout_width="368dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="27dp"
+        android:text="Test"
+        app:layout_constraintEnd_toEndOf="@+id/progressBarJump"
+        app:layout_constraintStart_toEndOf="@+id/progressBarJump"
+        app:layout_constraintTop_toBottomOf="@+id/jump" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="25dp" />
+
+</android.support.constraint.ConstraintLayout>
