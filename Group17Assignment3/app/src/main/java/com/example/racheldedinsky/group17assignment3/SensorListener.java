@@ -1,32 +1,28 @@
 package com.example.racheldedinsky.group17assignment3;
 
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
 /**
- * Created by RachelDedinsky on 3/26/18.
+ * Created by RachelDedinsky on 3/28/18.
  */
 
 public class SensorListener {
-    //variables to set up the database
-    private DataBaseHelper dbHandler= new DataBaseHelper(this);
-    static String dbName="ID_AGE_NAME_SEX";
+
+    private DBHandler dbHandler= new DBHandler(this);
+    static String dbName="Test";
     private SensorManager sensorManager;
     private Sensor accelerometer;
-    private int sensor_sampling_rate = 1000000;  // 1 sec
-    private String current_patient = "";
-    public static String LOG_TAG = "SensorListenerService";
+    private int sensor_sampling_rate = 100000;  // 10 hz??
+    private String current_activity = "";
+    public static String LOG_TAG = "SensorListener";
     private long timestamp;
-
     @Override
     public void onCreate() {
         //get sensor status and register for updates
@@ -48,8 +44,8 @@ public class SensorListener {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(LOG_TAG,"onStartCommand()");
-        current_patient = intent.getStringExtra("table_name");
-        Toast.makeText(this,"Service Started"+ current_patient,Toast.LENGTH_LONG);
+        current_activity = intent.getStringExtra("table_name");
+        Toast.makeText(this,"Service Started"+ current_activity,Toast.LENGTH_LONG);
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -101,12 +97,13 @@ public class SensorListener {
         // x, y, and z are values retrieved from the sensor in this class
 
         //Initialize table using table name
-        dbHandler.createPatientTable(dbName);
+        dbHandler.createTable(dbName);
         //create a timestamp that the x, y, and z values are generated in
         timestamp=System.currentTimeMillis()/1000;
         //Create an object using the current timestamp, x, y, and z
-        Patient patient = new Patient(timestamp, x, y, z);
+        ActivityData activityData = new ActivityData(timestamp, x, y, z);
         //Send the patient to the database
-        dbHandler.addHandler(patient);
+        dbHandler.addHandler(activityData);
     }
+}
 }

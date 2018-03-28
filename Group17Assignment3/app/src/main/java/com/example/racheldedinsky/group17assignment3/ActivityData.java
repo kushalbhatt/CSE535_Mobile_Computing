@@ -1,47 +1,45 @@
 package com.example.racheldedinsky.group17assignment3;
 
+import java.util.ArrayList;
+
 /**
- * Created by RachelDedinsky on 3/26/18.
+ * Created by RachelDedinsky on 3/28/18.
  */
 
 public class ActivityData {
     //fields
-    private long patienttimestamp;
-    private float patientxvalues;
-    private float patientyvalues;
-    private float patientzvalues;
-    // constructors
-    public ActivityData() {}
-    public ActivityData(long timestamp, float xvalues, float yvalues, float zvalues) {
-        this.patienttimestamp = timestamp;
-        this.patientxvalues = xvalues;
-        this.patientyvalues = yvalues;
-        this.patientzvalues = zvalues;
+    private int activity_iD;
+    private ArrayList<Integer[]> activity_data = new ArrayList<Integer[]>();
+    private String activity_label;
+    //constructors
+    public ActivityData(){}
+    public ActivityData(ArrayList<Integer[]> activityData,int id, String activityLabel){
+        this.activity_iD = id;
+        this.activity_data = activityData;
+        this.activity_label = activityLabel;
+    }
 
+    //properties
+    public void setiD(int id) {
+
+        this.activity_iD = id;
     }
-    // properties
-    public void setTimestamp(long timeStamp) {
-        this.patienttimestamp = timeStamp;
+    public int getiD() {
+        return this.activity_iD;
     }
-    public long getTimestamp() {
-        return this.patienttimestamp;
+    public void setActivityData(ArrayList<Integer[]> activityData) {
+        this.activity_data = activityData;
     }
-    public void setXValues(float x) {
-        this.patientxvalues = x;
+    public ArrayList<Integer[]> getActivityData() {
+
+        return this.activity_data;
     }
-    public float getXValues() {
-        return this.patientxvalues;
+    public void setActivityLabel(String activityLabel) {
+
+        this.activity_label = activityLabel;
     }
-    public void setYValues(float y) {
-        this.patientyvalues = y;
-    }
-    public float getYValues() {
-        return this.patientyvalues;
-    }
-    public void setZValues(float z) {
-        this.patientzvalues = z;
-    }
-    public float getZValues() {
-        return this.patientzvalues;
+    public String getActivityLabel() {
+
+        return this.activity_label;
     }
 }
