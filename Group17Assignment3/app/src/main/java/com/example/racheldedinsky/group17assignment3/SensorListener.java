@@ -27,7 +27,7 @@ public class SensorListener  extends Service implements SensorEventListener {
     String activityData = "";
     private SensorManager sensorManager;
     private Sensor accelerometer;
-    private int sensor_sampling_rate = 100000;  // 10 hz??
+    private int sensor_sampling_rate = 100000;  // 10 hz
     private String current_activity = "";
     public static String LOG_TAG = "SensorListener";
     private int counter=0;
@@ -70,13 +70,16 @@ public class SensorListener  extends Service implements SensorEventListener {
         float y = sensorEvent.values[1];
         float z = sensorEvent.values[2];
         // Pass sensor data to MainActivity class for plotting
+        //TODO
+        //store type to send to database
         Float array1[] = {x, y, z};
         al.add(array1);
-        Log.d("x y z: ", String.valueOf(al.get(counter)[0])+ " "+String.valueOf(al.get(counter)[1]) + " " + String.valueOf(al.get(counter)[1]));
+        Log.d("x y z: ", counter+" "+String.valueOf(al.get(counter)[0])+ " "+String.valueOf(al.get(counter)[1]) + " " + String.valueOf(al.get(counter)[1]));
         counter++;
         if(counter>=50)
         {
-            onDestroy();
+            //string stuff that doesn't work
+            /*
             JSONObject jsonObj = new JSONObject();
 
             JSONArray jsonArray = new JSONArray();
@@ -90,15 +93,14 @@ public class SensorListener  extends Service implements SensorEventListener {
 
                 jsonObj.put("data", jsonArray);
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             activityData = jsonObj.toString();
-            Log.e("DATA ", activityData); // adds only last array to json object
-
+            //Log.e("DATA ", activityData); // adds only last array to json object
+            */
             al.clear();
             counter=0;
-            sendToDatabase(dbActivityId,activityData,dbActivityLabel);
+            //sendToDatabase(dbActivityId,activityData,dbActivityLabel);
             dbActivityId="";
             activityData="";
             dbActivityLabel="";
