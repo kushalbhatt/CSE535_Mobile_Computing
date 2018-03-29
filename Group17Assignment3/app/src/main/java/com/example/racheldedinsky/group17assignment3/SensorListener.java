@@ -1,28 +1,38 @@
 package com.example.racheldedinsky.group17assignment3;
 
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
+import org.json.*;
+
+import java.util.ArrayList;
 
 /**
  * Created by RachelDedinsky on 3/28/18.
  */
 
-public class SensorListener {
+public class SensorListener  extends Service implements SensorEventListener {
 
     private DBHandler dbHandler= new DBHandler(this);
     static String dbName="Test";
+    static String dbActivityLabel = "";
+    static String dbActivityId = "";
+    String activityData = "";
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private int sensor_sampling_rate = 100000;  // 10 hz??
     private String current_activity = "";
     public static String LOG_TAG = "SensorListener";
-    private long timestamp;
+    private int counter=0;
+    ArrayList<Float[]> al = new ArrayList<Float[]>();
+
     @Override
     public void onCreate() {
         //get sensor status and register for updates
@@ -59,17 +69,41 @@ public class SensorListener {
         float x = sensorEvent.values[0];
         float y = sensorEvent.values[1];
         float z = sensorEvent.values[2];
-
-        if(!MainActivity.pause_flag)
+        // Pass sensor data to MainActivity class for plotting
+        Float array1[] = {x, y, z};
+        al.add(array1);
+        Log.d("x y z: ", String.valueOf(al.get(counter)[0])+ " "+String.valueOf(al.get(counter)[1]) + " " + String.valueOf(al.get(counter)[1]));
+        counter++;
+        if(counter>=50)
         {
-            // Pass sensor data to MainActivity class for plotting
-            MainActivity.set_sensor_vals(x,y,z);
-            //Log.d("x y z",x +" "+ y+" " + z);
-            //    Add this readings along with timestamp to the database table
-            //    But only if graph is being drawn (Run was pressed.)
-            //    Name of database is local variable = current_patient
-            sendToDatabase(x, y, z);
+            onDestroy();
+            JSONObject jsonObj = new JSONObject();
+
+            JSONArray jsonArray = new JSONArray();
+
+            try {
+                for (int i = 0; i < al.size(); i++) {
+                    JSONObject dataField = new JSONObject();
+                    dataField.put("data"+i, al.get(i)+"");
+                    jsonArray.put(i, dataField);
+                }
+
+                jsonObj.put("data", jsonArray);
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            activityData = jsonObj.toString();
+            Log.e("DATA ", activityData); // adds only last array to json object
+
+            al.clear();
+            counter=0;
+            sendToDatabase(dbActivityId,activityData,dbActivityLabel);
+            dbActivityId="";
+            activityData="";
+            dbActivityLabel="";
         }
+        //    Read activity data from db by converting string to json and json to arraylist of float ints
     }
 
     @Override
@@ -86,24 +120,20 @@ public class SensorListener {
     }
     //This function is called in the main activity after the user information has been entered in order
     //to set up the database with the correct name
-    public static void setDbName(String name)
+    public static void setNames(String name, String id, String label)
     {
         dbName = name;
+        dbActivityId = id;
+        dbActivityLabel = label;
     }
     //This should be called only after the run button is pressed in the GUI so the correct table
     //name is passed.
-    public void sendToDatabase(float x, float y, float z)
+    public void sendToDatabase(String id, String data, String label)
     {
-        // x, y, and z are values retrieved from the sensor in this class
-
-        //Initialize table using table name
         dbHandler.createTable(dbName);
-        //create a timestamp that the x, y, and z values are generated in
-        timestamp=System.currentTimeMillis()/1000;
-        //Create an object using the current timestamp, x, y, and z
-        ActivityData activityData = new ActivityData(timestamp, x, y, z);
+        ActivityData activityData = new ActivityData(id, data, label);
         //Send the patient to the database
         dbHandler.addHandler(activityData);
     }
 }
-}
+

@@ -45,9 +45,9 @@ public class DBHandler extends SQLiteOpenHelper {
         //kushal:  To avoid unnecessary db interactions as much as we can
         if(!TABLE_NAME.equals(table)) {
             //Integer is 8 bytes long, as is a long, so timestamp can be stored in an integer
-            String create_table = "CREATE TABLE IF NOT EXISTS " + table + "(ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+            String create_table = "CREATE TABLE IF NOT EXISTS " + table + "(ID TEXT PRIMARY KEY AUTOINCREMENT," +
                     COLUMN_ID + " INTEGER," +
-                    COLUMN_DATA + " INTEGER," + COLUMN_LABEL + " TEXT);";
+                    COLUMN_DATA + " TEXT," + COLUMN_LABEL + " TEXT);";
             TABLE_NAME = table;
             database.execSQL(create_table);
             Log.d("KUSHAL", "Tabel created : " + table);
@@ -72,7 +72,8 @@ public class DBHandler extends SQLiteOpenHelper {
         ActivityData activityData = new ActivityData();
         if (cursor!=null && cursor.moveToFirst()) {
             cursor.moveToFirst();
-            activityData.setiD(Integer.parseInt(cursor.getString(0)));
+            activityData.setiD(cursor.getString(0));
+            activityData.setActivityData(cursor.getString(1));
             activityData.setActivityLabel(cursor.getString(2));
             cursor.close();
         } else {

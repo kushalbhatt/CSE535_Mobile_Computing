@@ -1,5 +1,6 @@
 package com.example.racheldedinsky.group17assignment3;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -21,6 +22,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     boolean train_enabled=true;
     ProgressBar progressBar_walk_var, progressBar_run_var, progressBar_jump_var;
     TextView wait_for_not_clicked;
+    DBHandler dbHandler = new DBHandler(this);
+    String tablename = "TEST";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -33,6 +36,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         trainJumpCount=0;
         trainRunCount=0;
         initView();
+    }
+    @Override
+    protected void onDestroy() {
+        //kill the service when app closes
+        stopService(new Intent(this,SensorListener.class));
+        dbHandler.close();
+        super.onDestroy();
     }
     public void onClick(View view)
     {
@@ -60,29 +70,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     try {
                         train_enabled=false;
                         train_button_var.setEnabled(train_enabled);
+                        String activity_id = "";
                         if (!(empty_string)) {
-                            //Toast.makeText(getApplicationContext(), activity, Toast.LENGTH_LONG).show();
-                            if (activity == "Walk") {
+
+                            //Start the sensorlistner to sample accelerometer data
+                            Intent sensorService = new Intent(MainActivity.this,SensorListener.class);
+                            //Use Bundle if any data needs to be passed along with this intent
+                            startService(sensorService);
+                            dbHandler.createTable(tablename);
+                            if (activity == "Walk" && trainWalkCount<=20) {
                                 trainWalkCount++;
                                 progressBar_walk_var.setProgress(0);
                                 progressBar_walk_var.setProgress(trainWalkCount);
-                                Integer array1[] = {1, 2, 3};
-                                Integer array2[] = {4, 5, 6};
-                                ArrayList<Integer[]> al = new ArrayList<Integer[]>();
-                                al.add(array1);
-                                al.add(array2);
-                                //Toast.makeText(getApplicationContext(), "Arraylist contains: " + al.get(1)[1], Toast.LENGTH_LONG).show();
-                                Toast.makeText(getApplicationContext(), trainWalkCount + "", Toast.LENGTH_LONG).show();
-                            } else if (activity == "Run") {
+                                activity_id = "w"+trainWalkCount;
+                            } else if (activity == "Run" && trainRunCount<=20) {
                                 trainRunCount++;
                                 progressBar_run_var.setProgress(0);
                                 progressBar_run_var.setProgress(trainRunCount);
-                                Toast.makeText(getApplicationContext(), trainRunCount + "", Toast.LENGTH_LONG).show();
-                            } else if (activity == "Jump"){
+                                activity_id = "r"+trainRunCount;
+                            } else if (activity == "Jump" && trainJumpCount<=20){
                                 trainJumpCount++;
                                 progressBar_jump_var.setProgress(0);
                                 progressBar_jump_var.setProgress(trainJumpCount);
-                                Toast.makeText(getApplicationContext(), trainJumpCount + "", Toast.LENGTH_LONG).show();
+                                activity_id = "j"+trainJumpCount;
                             }
                             else
                             {
@@ -93,7 +103,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         {
                             Toast.makeText(getApplicationContext(), "Invalid data. Please enter the details correctly.", Toast.LENGTH_SHORT).show();
                         }
-                        activity = "";
+                        SensorListener.setNames(tablename,activity_id,activity);
+                        Toast.makeText(getApplicationContext(), activity_id, Toast.LENGTH_LONG).show();
+                        //Wait while app collects the data
+                        //TimeUnit.SECONDS.sleep(5);
                         train_enabled=true;
                         train_button_var.setEnabled(train_enabled);
                         wait_for_not_clicked.setText("");

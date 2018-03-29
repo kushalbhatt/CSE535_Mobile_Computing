@@ -8,29 +8,29 @@ import java.util.ArrayList;
 
 public class ActivityData {
     //fields
-    private int activity_iD;
-    private ArrayList<Integer[]> activity_data = new ArrayList<Integer[]>();
+    private String activity_iD;
+    private String activity_data;
     private String activity_label;
     //constructors
     public ActivityData(){}
-    public ActivityData(ArrayList<Integer[]> activityData,int id, String activityLabel){
+    public ActivityData(String activityData, String id, String activityLabel){
         this.activity_iD = id;
         this.activity_data = activityData;
         this.activity_label = activityLabel;
     }
 
     //properties
-    public void setiD(int id) {
+    public void setiD(String id) {
 
         this.activity_iD = id;
     }
-    public int getiD() {
+    public String getiD() {
         return this.activity_iD;
     }
-    public void setActivityData(ArrayList<Integer[]> activityData) {
+    public void setActivityData(String activityData) {
         this.activity_data = activityData;
     }
-    public ArrayList<Integer[]> getActivityData() {
+    public String getActivityData() {
 
         return this.activity_data;
     }
