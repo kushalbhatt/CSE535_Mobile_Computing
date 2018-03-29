@@ -45,7 +45,7 @@ public class SensorListener  extends Service implements SensorEventListener {
             Toast.makeText(this,"Accelerometer is not available!",Toast.LENGTH_LONG);
             // AlertDialog can also be shown -- Optional
         }
-        sensorManager.registerListener(this,accelerometer,sensor_sampling_rate);
+       // sensorManager.registerListener(this,accelerometer,sensor_sampling_rate);
         //dbHelper = new DatabaseHelper(this);
         Toast.makeText(this,"Service Started",Toast.LENGTH_LONG);
         super.onCreate();
@@ -53,9 +53,12 @@ public class SensorListener  extends Service implements SensorEventListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(LOG_TAG,"onStartCommand()");
+        Log.d("RACHEL","onStartCommand() called");
         current_activity = intent.getStringExtra("table_name");
         Toast.makeText(this,"Service Started"+ current_activity,Toast.LENGTH_LONG);
+        counter=0;
+        al.clear();
+        startListner();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -69,38 +72,18 @@ public class SensorListener  extends Service implements SensorEventListener {
         float x = sensorEvent.values[0];
         float y = sensorEvent.values[1];
         float z = sensorEvent.values[2];
-        // Pass sensor data to MainActivity class for plotting
         //TODO
         //store type to send to database
         Float array1[] = {x, y, z};
         al.add(array1);
-        Log.d("x y z: ", counter+" "+String.valueOf(al.get(counter)[0])+ " "+String.valueOf(al.get(counter)[1]) + " " + String.valueOf(al.get(counter)[1]));
+        //Log.d("x y z: ", counter+" "+String.valueOf(al.get(counter)[0])+ " "+String.valueOf(al.get(counter)[1]) + " " + String.valueOf(al.get(counter)[1]));
         counter++;
         if(counter>=50)
         {
-            //string stuff that doesn't work
-            /*
-            JSONObject jsonObj = new JSONObject();
-
-            JSONArray jsonArray = new JSONArray();
-
-            try {
-                for (int i = 0; i < al.size(); i++) {
-                    JSONObject dataField = new JSONObject();
-                    dataField.put("data"+i, al.get(i)+"");
-                    jsonArray.put(i, dataField);
-                }
-
-                jsonObj.put("data", jsonArray);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            activityData = jsonObj.toString();
-            //Log.e("DATA ", activityData); // adds only last array to json object
-            */
+            stopListener();
+            MainActivity.enableButton(true);
+            sendToDatabase(dbActivityId,al,dbActivityLabel);
             al.clear();
-            counter=0;
-            //sendToDatabase(dbActivityId,activityData,dbActivityLabel);
             dbActivityId="";
             activityData="";
             dbActivityLabel="";
@@ -130,12 +113,19 @@ public class SensorListener  extends Service implements SensorEventListener {
     }
     //This should be called only after the run button is pressed in the GUI so the correct table
     //name is passed.
-    public void sendToDatabase(String id, String data, String label)
+    public void sendToDatabase(String id, ArrayList<Float[]> data, String label)
     {
         dbHandler.createTable(dbName);
-        ActivityData activityData = new ActivityData(id, data, label);
-        //Send the patient to the database
-        dbHandler.addHandler(activityData);
+        dbHandler.addHandler(id,data,label);
+    }
+
+    public void startListner()
+    {
+        sensorManager.registerListener(this,accelerometer,sensor_sampling_rate);
+    }
+    public void stopListener()
+    {
+        sensorManager.unregisterListener(this);
     }
 }
 

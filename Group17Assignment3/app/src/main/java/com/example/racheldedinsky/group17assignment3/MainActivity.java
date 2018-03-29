@@ -14,11 +14,11 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     //Instatiate the button variables
-    Button train_button_var, test_button_var;
+    static Button train_button_var, test_button_var;
     //This is the number of training data sets taken
     int trainWalkCount, trainRunCount, trainJumpCount;
     //train button can't be hit unless train_enabled is true
-    boolean train_enabled=true;
+    static boolean train_enabled=true;
     //The progress bar associated with the training data
     ProgressBar progressBar_walk_var, progressBar_run_var, progressBar_jump_var;
     //Error text box that appears when train is pressed when other processes are running
@@ -77,13 +77,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         empty_string=true;
                     }
                     try {
-                        //train_enabled will be disabled while the data is being taken
-                        train_enabled=false;
-                        train_button_var.setEnabled(train_enabled);
                         //the string id will be the concatenation of the first letter of the activity and the trainCount
                         String activity_id = "";
                         //if a radio button has been selected, the following will run
                         if (!(empty_string)) {
+                            train_enabled=false;
+                            enableButton(train_enabled);
+                            Log.d("RACHEL","Enable button false");
                             if (activity == "Walk" && trainWalkCount<=20) {
                                 trainWalkCount++;
                                 progressBar_walk_var.setProgress(0);
@@ -110,9 +110,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         {
                             Toast.makeText(getApplicationContext(), "Invalid data. Please enter the details correctly.", Toast.LENGTH_SHORT).show();
                         }
-                        //TODO
                         //Check if sesnor values works more than one time of radio button being hit
-                        Log.d("SENSOR:","START SENSOR");
+                        Log.d("RACHEL:","START SENSOR");
                         //Start the sensorlistner to sample accelerometer data
                         Intent sensorService = new Intent(MainActivity.this,SensorListener.class);
                         //Use Bundle if any data needs to be passed along with this intent
@@ -122,12 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Toast.makeText(getApplicationContext(), activity_id, Toast.LENGTH_LONG).show();
                         //Wait while app collects the data
                         //TODO
-                        //This makes the app buggy for some reason?
-                        TimeUnit.SECONDS.sleep(5);
-                        Log.d("SENSOR:","STOP Sensor");
-                        stopService(new Intent(this,SensorListener.class));
-                        train_enabled=true;
-                        train_button_var.setEnabled(train_enabled);
+                        //This may be useless button
                         wait_for_not_clicked.setText("");
                     } catch (Exception e) {
                         Toast.makeText(getApplicationContext(), "Invalid data! Please enter the details correctly.", Toast.LENGTH_SHORT).show();
@@ -141,6 +135,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.test_button:
                 break;
         }
+    }
+    static public void enableButton(boolean train_enable)
+    {
+        train_enabled= train_enable;
+        train_button_var.setClickable(train_enabled);
+        train_button_var.setEnabled(train_enable);
     }
     public void initView() {
 

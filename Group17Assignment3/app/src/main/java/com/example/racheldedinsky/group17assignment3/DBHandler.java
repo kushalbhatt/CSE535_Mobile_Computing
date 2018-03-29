@@ -24,6 +24,8 @@ public class DBHandler extends SQLiteOpenHelper {
     public static final String COLUMN_ID = "ActivityID";
     public static final String COLUMN_DATA = "ActivityData";
     public static final String COLUMN_LABEL = "ActivityLabel";
+
+    String columnsString = "";
     //initialize the database
     private SQLiteDatabase database = null;
     public DBHandler(Context context)
@@ -34,7 +36,14 @@ public class DBHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         //called only after getReadable or getWritableDatabase() is invoked
+        Log.d("RAHEL","once on create db"+DATABASE_PATH);
         database = db;
+        StringBuilder sqlStr = new StringBuilder();
+        for(int i=0;i<50;i++)
+        {
+            sqlStr.append("x"+i+" FLOAT, "+"y"+i+" FLOAT, "+"z"+i+" FLOAT, ");
+        }
+        columnsString=sqlStr.toString();
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {}
@@ -45,25 +54,31 @@ public class DBHandler extends SQLiteOpenHelper {
         //kushal:  To avoid unnecessary db interactions as much as we can
         if(!TABLE_NAME.equals(table)) {
             //Integer is 8 bytes long, as is a long, so timestamp can be stored in an integer
-            String create_table = "CREATE TABLE IF NOT EXISTS " + table + "(ID TEXT PRIMARY KEY AUTOINCREMENT," +
-                    COLUMN_ID + " INTEGER," +
-                    COLUMN_DATA + " TEXT," + COLUMN_LABEL + " TEXT);";
+            String create_table = "CREATE TABLE IF NOT EXISTS " + table + "(" +
+                    COLUMN_ID + " TEXT," +
+                    columnsString + COLUMN_LABEL + " TEXT);";
+            //create column_data "X"+i+ " FLOAT," in loop
             TABLE_NAME = table;
             database.execSQL(create_table);
             Log.d("KUSHAL", "Tabel created : " + table);
         }
     }
+
     //Use this to add entries to the database
-    public void addHandler(ActivityData activityData) {
+    public void addHandler(String id, ArrayList<Float[]> data, String label) {
         ContentValues values = new ContentValues();
         //Integer is 8 bytes long, as is a long, so timestamp can be stored in an integer
-        values.put(COLUMN_ID, activityData.getiD());
-        values.put(COLUMN_DATA, activityData.getActivityData());
-        values.put(COLUMN_LABEL, activityData.getActivityLabel());
+        values.put(COLUMN_ID, id);
+        Log.d("RACHEL",data.size()+"");
+        for(int i=0;i<50;i++)
+        {
+            Float[] vals= data.get(i);
+            values.put("x"+i,vals[0]);
+            values.put("y"+i,vals[1]);
+            values.put("z"+i,vals[2]);
+        }
+        values.put(COLUMN_LABEL, label);
         database.insert(TABLE_NAME, null, values);
-        /*ashni*/
-        //TODO
-        //database.close();
     }
     //Use this to check if a timestamp already exists in the database.
     public ActivityData findHandler(int id) {
