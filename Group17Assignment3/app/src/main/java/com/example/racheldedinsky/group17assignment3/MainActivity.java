@@ -133,6 +133,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.test_button:
+                fetchData fd = new fetchData();
+                fd.executeTask();
                 break;
         }
     }
