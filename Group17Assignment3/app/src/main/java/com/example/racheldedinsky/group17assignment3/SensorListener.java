@@ -81,7 +81,7 @@ public class SensorListener  extends Service implements SensorEventListener {
         if(counter>=50)
         {
             stopListener();
-            trainActivity.enableButton(true);
+            MainActivity.enableButton(true);
             sendToDatabase(dbActivityId,al,dbActivityLabel);
             al.clear();
             dbActivityId="";
