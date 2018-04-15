@@ -31,6 +31,7 @@ public  class fetchData extends AppCompatActivity {
     public void executeTask(){
         Log.d(" fetch data","Hi");
         new CreateCSV().execute();
+        new CreateFloatArray().execute();
     }
 
     class CreateCSV extends AsyncTask<String, Void, Boolean> {
@@ -41,7 +42,7 @@ public  class fetchData extends AppCompatActivity {
 
             try {
 
-                SQLiteDatabase database = SQLiteDatabase.openDatabase(Environment.getExternalStorageDirectory().getPath()+"/CSE535_ASSIGNMENT3/activityactivityDB.db", null, 0);
+                SQLiteDatabase database = SQLiteDatabase.openDatabase(Environment.getExternalStorageDirectory().getPath()+"/CSE535_ASSIGNMENT3/activityDB.db", null, 0);
                 Log.d("no exception","no exception");
                 //String query = "Select * from TEST";
                 //File db = getDatabasePath(Environment.getExternalStorageDirectory().getPath()+"/CSE535_ASSIGNMENT3/activityDB.db");
@@ -79,6 +80,67 @@ public  class fetchData extends AppCompatActivity {
 
                 }
                 catch(SQLiteException e){
+                    e.printStackTrace();
+                    Log.d("ashni, exception","ashni exception here");
+                    return false;
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d("ashni, exception","ashni exception here");
+                return false;
+            }
+
+        }
+
+        //        @Override
+        //        protected void onPostExecute(final Boolean success) {
+        //            if (success) {
+        //                Toast.makeText(getApplicationContext(), "Export successful!", Toast.LENGTH_SHORT).show();
+        //            }  else {
+        //                Toast.makeText(getApplicationContext(), "Export failed", Toast.LENGTH_SHORT).show();
+        //            }
+        //        }
+
+    }
+
+    class CreateFloatArray extends AsyncTask<String, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(String... strings) {
+
+        float[][] myValues;
+            try {
+
+                SQLiteDatabase database = SQLiteDatabase.openDatabase(Environment.getExternalStorageDirectory().getPath() + "/CSE535_ASSIGNMENT3/activityDB.db", null, 0);
+                Log.d("no exception", "no exception");
+                String query = "Select * from TEST";
+                try{
+                    Cursor cursor = database.rawQuery(query,null);
+                    Log.d("cursor rows",""+cursor.getCount());
+                    myValues = new float[cursor.getCount()][152];
+                    if(cursor.moveToFirst()){
+                        for(int i=1;i<cursor.getCount();i++){
+                            for(int j=1;j<152;j++){
+                                Float val = cursor.getFloat(j);
+                                myValues[i-1][j-1]=val;
+                                Log.d("val",""+val);
+
+
+                            }
+                            Log.d("new row","---------");
+                            cursor.moveToNext();
+
+                        }
+
+                    }
+                    Log.d("float array",myValues+"");
+                    cursor.close();
+                    database.close();
+                    return null;
+
+
+            }catch(SQLiteException e){
                     e.printStackTrace();
                     Log.d("ashni, exception","ashni exception here");
                     return false;
