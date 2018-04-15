@@ -1,0 +1,131 @@
+Instructions to user opencv C++ API in android studio.
+Note: The full library is only available in C++.
+
+Note: In addition to the following instrucitons, you need to set the system path variable to include opencv.
+
+Used Jely Bean API 16 as minumum
+
+Step 0: Create new project and "Include C++ support".
+Use C++ standard C++11.
+Check "Exceptions Supprt" and "Runtime Type Information".
+
+
+Step 1:
+file->new->import module:
+/home/josh/OpenCV-android-sdk/sdk/java
+
+Step 2:
+Change: build.gradle (Module: openCVLibrary341)
+to match the regular build.gradle file.
+
+Step 3:
+Project-View -> app -> src -> main -> right-click-main -> new -> Directory:
+jniLibs
+
+Step 4:
+Copy contents from /home/josh/OpenCV-android-sdk/sdk/native/libs
+into the jniLibs directory.
+There are 7 folders.
+
+Step 5:
+Android-View -> Right-click-app -> open-module-settings -> dependencies -> green-plus -> module-dependency -> select "openCVLibrary341" -> OK -> OK
+
+Step 6:
+in CMakeLists.txt
+[AT TOP]:
+#set(pathToOpenCV C:/opencv/OpenCV-android-sdk/sdk/native)
+set(pathToOpenCV /home/josh/OpenCV-android-sdk/sdk/native)
+
+#set(pathToProject C:/Users/josh/Desktop/HelloOpenCv)
+set(pathToProject /home/josh/Desktop/Parallel_Vision_Research/Mobile_App)
+
+include_directories(${pathToOpenCV}/jni/include)
+
+
+[AFTER cmake_minimum...]:
+set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+
+include_directories(${pathToOpenCv}/sdk/native/jni/include)
+
+
+[AFTER add_library(...)]: (don't replace, just add):
+add_library(lib_opencv SHARED IMPORTED)
+set_target_properties(lib_opencv PROPERTIES IMPORTED_LOCATION ${pathToProject}/app/src/main/jniLibs/${ANDROID_ABI}/libopencv_java3.so)
+
+
+[AFTER #Specific libraries CMake should link ...]:
+replace target_link_libraries with:
+
+
+[AT THE VERY END]: Replace target_link_libraries with:
+target_link_libraries( native-lib $\{log-lib} lib_opencv)
+
+
+#-------
+#------- Main Activity:
+#-------
+
+public class MainActivity extends AppCompatActivity {
+
+    // Used to load the 'native-lib' library on application startup.
+    static {
+        System.loadLibrary("native-lib");
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Example of a call to a native method
+        TextView textView = (TextView) findViewById(R.id.sample_text);
+        textView.setText(stringFromJNI());
+
+        if (!OpenCVLoader.initDebug()) {
+            textView.setText(textView.getText() + "\n OpenCVLoader.initDebug() is NOT working.");
+        } else {
+            textView.setText(textView.getText() + "\n OpenCVLoader.initDebug() IS working.");
+            textView.setText(textView.getText() + "\n" + validate(0L, 0L));
+        }
+    }
+
+    /**
+     * A native method that is implemented by the 'native-lib' native library,
+     * which is packaged with this application.
+     */
+    public native String stringFromJNI();
+
+    // Added - JOSH:
+    public native String validate(long matAddrGr, long matAddrRgba);
+
+    // Remember that you set the environment variable also
+}
+
+#-------
+#------- native-lib.cpp
+#-------
+#include <jni.h>
+#include <string>
+#include <opencv2/core.hpp>
+//=================================================
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_example_josh_opencv_MainActivity_stringFromJNI(JNIEnv *env, jobject instance) {
+
+        std::string hello = "Hello from C++";
+        return env->NewStringUTF(hello.c_str());
+}
+//=================================================
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_example_josh_opencv_MainActivity_validate(JNIEnv *env, jobject instance, jlong matAddrGr,
+                                                   jlong matAddrRgba) {
+    //cv::Rect();
+    cv::Mat testMat;
+    std::string hello2 = "Hello from validate()";
+
+    return env->NewStringUTF(hello2.c_str());
+}
+
+
