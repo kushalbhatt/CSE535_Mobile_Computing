@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //table name for the database
     String tablename = "TEST";
 
+    public native String stringFromJNI();
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
