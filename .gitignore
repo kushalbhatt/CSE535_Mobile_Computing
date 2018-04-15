@@ -9,4 +9,4 @@
 .externalNativeBuild
 
 # Ignore video files for the project submission:
-rachelVideo
+#rachelVideo
