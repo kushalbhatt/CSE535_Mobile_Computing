@@ -1,4 +1,4 @@
-Instructions to user opencv C++ API in android studio.
+Instructions to use opencv C++ API in android studio.
 Note: The full library is only available in C++.
 
 Note: In addition to the following instrucitons, you need to set the system path variable to include opencv.
@@ -13,6 +13,7 @@ Check "Exceptions Supprt" and "Runtime Type Information".
 Step 1:
 file->new->import module:
 /home/josh/OpenCV-android-sdk/sdk/java
+C:/opencv/OpenCV-android-sdk/sdk/java # Windows
 
 Step 2:
 Change: build.gradle (Module: openCVLibrary341)
