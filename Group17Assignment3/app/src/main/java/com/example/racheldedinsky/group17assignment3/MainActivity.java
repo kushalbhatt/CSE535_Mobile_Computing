@@ -29,8 +29,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String tablename = "TEST";
 
     public native String stringFromJNI();
-    public native float[] svm(float[] arr);
+    public native float[] svm(float[] X, float[] Y);
     public native float[] test(float[] arr1, float[] arr2);
+    public native float[] SVM_train(float[] X, float[] Y); // MxN data matrix and Mx1 target vector
+    public native float[] SVM_predict(float[] x); // pass in single feature vector
+
 
     static {
         System.loadLibrary("native-lib");
@@ -287,10 +290,57 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         X = two2oneD(X_mat, M, N);
 
 
+        // Target vector:
+        float[] Y = new float[M];
+        Y[0] = 1;
+        Y[1] = -1;
+        Y[2] = -1;
+        Y[3] = -1;
+
+
+
         // Pass data matrix to svm in C++
         float[] arrayTest = new float[M * N];
-        arrayTest = svm(X);
+        arrayTest = svm(X, Y);
 
         int temp0 = 0;
     }
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    public void train(float[][] X, float[] Y, int M, int N) {
+        // Method train does the following:
+        // Step 1: Hand me the 2D data matrix and 1D target vector
+        // Step 2: Convert X to a 1D array
+        // Step 3: Pass array into the svm function
+        // Step 4: Generate model W,b from X,Y
+        // Step 5: Store W,b
+        //
+        // Input args:
+        //  X:  M x N data matrix
+        //  Y:  M x 1 target vector
+        //  M:  Number of training examples
+        //  N:  Number of features
+        // Output args:
+        //  none
+
+        // Copy 2D array into 1D array:
+        float[] X_lin = new float[M * N];
+        X_lin = two2oneD(X, M, N);
+
+        // Pass into C++
+        SVM_train(X_lin, Y);
+    }
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    public void predict(float[] x, int N) {
+        // Function SVM_predict:
+        // Input args:
+        //  x:    N-dimensional feature vector
+        //  N:      Number of dimensions of x
+        // Output args:
+        //  none
+
+        // Pass into C++
+        SVM_predict(x);
+    }
+    //==============================================================================================
 }

@@ -22,35 +22,27 @@ void train(Mat X, Mat Y)
     svm->train(X, ROW_SAMPLE, Y);
 }
 //=====================================
-void svm_4x3(float* arrOut, float* arr1, int n) // modify to take variable size n
+void svm_4x3(float* arrOut, float* arr1, float* arr2) // modify to take variable size n
 {
     // Set up training data
     const size_t N = 3; // Features
     const size_t M = 4; // Examples
+
+    // 1D -> 2D
+    float X_arr[M][N];
     int Y_arr[M][1];
-    Y_arr[0][0] = 1;
-    Y_arr[1][0] = -1;
-    Y_arr[2][0] = -1;
-    Y_arr[3][0] = -1;
-
-    //// Initialize training data:
-    //float X_arr[M][N] = // M x 3 => Num Training Examples x Spatial Dimensions of Each Sample
-    //        { { 0, 256, 0 },
-    //          { 256, 0, 0 },
-    //          { 512, 0, 0 },
-    //          { 512, 256, 0 } };
-
-    //delinearize_2D(arr2d, flt1);
-    float X_arr[4][3]; // M x 2 => Num Training Examples x Spatial Dimensions of Each Sample
-    for (int i = 0; i < 4; ++i) // Depth of Feature Map
-        for (int j = 0; j < 3; ++j) // Height of Feature Map
-            X_arr[i][j] = arr1[i * 3 + j];
+    for (int i = 0; i < M; ++i)
+    {
+        for (int j = 0; j < N; ++j)
+        {
+            X_arr[i][j] = arr1[i * N + j];
+        }
+        Y_arr[i][0] = static_cast<int>(arr2[i]);
+    }
 
     // Copy arr into Mat
     Mat X(M, N, CV_32FC1, X_arr);
     Mat Y(M, 1, CV_32SC1, Y_arr);  // TO FIX THIS JUST PUT Y in a 2D array then pass it in here
-
-
 
     auto debug1_y = Y.at<int>(0, 0);
     auto debug2_y = Y.at<int>(1, 0);
@@ -79,6 +71,12 @@ void svm_4x3(float* arrOut, float* arr1, int n) // modify to take variable size 
     // Create a set of N-D vectors to test the trained SVM with
     cv::Size size(N, 1);
     Mat mat1 = Mat::zeros(size, CV_32FC1);
+
+
+    int tempa = 0;
+    int tempb = 0;
+    int tempc = 0;
+    int tempd = 0;
 
     // (0, 0) -> +1
     auto predict1 = svm->predict(mat1);
@@ -174,7 +172,8 @@ Java_com_example_racheldedinsky_group17assignment3_MainActivity_test(JNIEnv *env
 extern "C"
 JNIEXPORT jfloatArray JNICALL
 Java_com_example_racheldedinsky_group17assignment3_MainActivity_svm(JNIEnv *env, jobject instance,
-                                                                    jfloatArray fltarray1) {
+                                                                    jfloatArray X_,
+                                                                    jfloatArray Y_) {
     const int N = 12;
 
     jfloatArray result;
@@ -185,16 +184,18 @@ Java_com_example_racheldedinsky_group17assignment3_MainActivity_svm(JNIEnv *env,
 
     // increase to len-4
     jfloat array1[N];
-    jfloat* flt1 = env->GetFloatArrayElements( fltarray1,0);
+    jfloat* flt1 = env->GetFloatArrayElements( X_, 0 );
+    jfloat* flt2 = env->GetFloatArrayElements( Y_, 0 );
 
     // Pass flt1 into the SVM function
     float vecRtrn[N];
-    svm_4x3(vecRtrn, flt1, N);
+    svm_4x3(vecRtrn, flt1, flt2);
 
     // Copy data from C++ float array to the funky jfloatArray type - put in function to get out of sight
     for (int i = 0; i < N; i++) // Copy to output array
         array1[i] = vecRtrn[i];
-    env->ReleaseFloatArrayElements(fltarray1, flt1, 0);
+    env->ReleaseFloatArrayElements( X_, flt1, 0 );
+    env->ReleaseFloatArrayElements( Y_, flt2, 0);
     env->SetFloatArrayRegion(result, 0, N, array1); // Range: [0,N]
     return result;
 }
