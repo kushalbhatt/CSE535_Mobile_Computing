@@ -17,10 +17,6 @@ import au.com.bytecode.opencsv.CSVWriter;
  * Created by asmodi on 4/12/18.
  */
 
-
-
-
-
 public  class fetchData extends AppCompatActivity {
 
     fetchData(){

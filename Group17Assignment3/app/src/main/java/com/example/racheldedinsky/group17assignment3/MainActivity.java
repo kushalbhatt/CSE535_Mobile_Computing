@@ -51,31 +51,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initView();
 
 
-        // Test the C-function:
-        int n = 4;
-        float[] array3 = new float[n];
-        float[] array1 = new float[n];
-        float[] array2 = new float[n];
 
-        array1[0] = 0;      array1[1] = 1;
-        array1[2] = 2;      array1[3] = 3;
 
-        //array1[0] = 0;      array1[1] = 255;    array1[2] = 0;
-        //array1[3] = 255;    array1[4] = 0;      array1[5] = 0;
-        //array1[6] = 512;    array1[7] = 0;      array1[8] = 0;
-        //array1[9] = 512;    array1[10] = 255;   array1[11] = 0;
-
-        for (int i = 0; i < n; i++) {
-            array2[i] = array1[i];
-            array3[i] = 0;
-        }
-
-        //String temp_string = stringFromJNI();
-         array3 = test(array1, array2);
-        // if x = [0 1; 2 3]
-        // then x^2 = [2 3; 6 11]
-
-        int debug1 = 0;
     }
     @Override
     protected void onDestroy() {
@@ -86,9 +63,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     public void onClick(View view)
     {
-
-
-
         //switch statement based on which button
         switch (view.getId())
         {
@@ -173,6 +147,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.test_button:
                 fetchData fd = new fetchData();
                 fd.executeTask();
+
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+                // Test the C-function:
+                int n = 4;
+                float[] array3 = new float[n];
+                float[] array1 = new float[n];
+                float[] array2 = new float[n];
+
+                array1[0] = 0;      array1[1] = 1;
+                array1[2] = 2;      array1[3] = 3;
+
+                //array1[0] = 0;      array1[1] = 255;    array1[2] = 0;
+                //array1[3] = 255;    array1[4] = 0;      array1[5] = 0;
+                //array1[6] = 512;    array1[7] = 0;      array1[8] = 0;
+                //array1[9] = 512;    array1[10] = 255;   array1[11] = 0;
+
+                for (int i = 0; i < n; i++) {
+                    array2[i] = array1[i];
+                    array3[i] = 0;
+                }
+
+                //String temp_string = stringFromJNI();
+                array3 = test(array1, array2);
+                // if x = [0 1; 2 3]
+                // then x^2 = [2 3; 6 11]
+
+                int debug1 = 0;
+
+
+
                 break;
         }
     }
