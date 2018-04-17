@@ -29,7 +29,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String tablename = "TEST";
 
     public native String stringFromJNI();
+    public native float[] svm(float[] arr);
+    public native float[] test(float[] arr1, float[] arr2);
 
+    static {
+        System.loadLibrary("native-lib");
+        System.loadLibrary("opencv_java3");
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -43,6 +49,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         trainRunCount=0;
         //Initialize the app view
         initView();
+
+
+        // Test the C-function:
+        int n = 4;
+        float[] array3 = new float[n];
+        float[] array1 = new float[n];
+        float[] array2 = new float[n];
+
+        array1[0] = 0;      array1[1] = 1;
+        array1[2] = 2;      array1[3] = 3;
+
+        //array1[0] = 0;      array1[1] = 255;    array1[2] = 0;
+        //array1[3] = 255;    array1[4] = 0;      array1[5] = 0;
+        //array1[6] = 512;    array1[7] = 0;      array1[8] = 0;
+        //array1[9] = 512;    array1[10] = 255;   array1[11] = 0;
+
+        for (int i = 0; i < n; i++) {
+            array2[i] = array1[i];
+            array3[i] = 0;
+        }
+
+        //String temp_string = stringFromJNI();
+         array3 = test(array1, array2);
+        // if x = [0 1; 2 3]
+        // then x^2 = [2 3; 6 11]
+
+        int debug1 = 0;
     }
     @Override
     protected void onDestroy() {
@@ -53,6 +86,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     public void onClick(View view)
     {
+
+
+
         //switch statement based on which button
         switch (view.getId())
         {
@@ -167,4 +203,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         train_button_var.setOnClickListener(this);
 
     }
+    //==============================================================================================
+    public float[][] one2twoD(float[] arr, int rows, int cols) {
+        float[][] mat = new float[rows][cols]; // Data matrix with M rows and N cols
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j){
+                mat[i][j] = arr[i * cols + j]; // Count up in row-major fashion
+            } // end for over j
+        } // end for over i
+        return mat;
+    }
+    public float[] two2oneD(float[][] mat, int rows, int cols) {
+        float[] arr = new float[rows * cols]; // Data matrix with M rows and N cols
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j){
+                arr[i * cols + j] = mat[i][j]; // Count up in row-major fashion
+            } // end for over j
+        } // end for over i
+        return arr;
+    }
+
 }
