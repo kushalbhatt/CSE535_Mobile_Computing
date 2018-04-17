@@ -242,34 +242,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     public void testOpenCV_interop() {
-        int M = 4, N = 3;
+        int M = 4, N = 150;
         float[] X_lin = new float[M * N]; // Data matrix with M rows and N cols
-        int count = 0;
-        /*
-        for (int i = 0; i < M * N; i+=N) {
-            count = i; //* N + j; // Count up sequentially
-            float temp;
-            if (count < M*N / 2) {// 1st half of rows
-                X_lin[count+0]=0;   X_lin[count+1]=255; X_lin[count+2]=0; // upper right of xy-plane
-            }
-            else {
-                X_lin[count+0]=255; X_lin[count+1]=0;   X_lin[count+2]=0; // lower left of xy-plane
-            }
-            //  z=0
-            //     \  x=0   x=1  ...  x=N-1
-            //      \----------------------
-            // y=0  |_____|_____|...|______|
-            // y=1  |_____|_____|...|______|
-            //  .   |_____|_____|...|______|
-            //  .   |_____|_____|...|______|
-            //  .   |_____|_____|...|______|
-            // y=M-1|_____|_____|...|______|
-        }
-        */
-        X_lin[0] = 0;  X_lin[1] = 256;   X_lin[2] = 0;
-        X_lin[3] = 256;  X_lin[4] = 0;   X_lin[5] = 0;
-        X_lin[6] = 512;  X_lin[7] = 0;   X_lin[8] = 0;
-        X_lin[9] = 512;  X_lin[10] = 256;  X_lin[11] = 0;
+        for (int i = 0; i < M * N; ++i)
+            X_lin[i] = 0;
+        //  z=0
+        //     \  x=0   x=1  ...  x=N-1
+        //      \----------------------
+        // y=0  |_____|_____|...|______|
+        // y=1  |_____|_____|...|______|
+        //  .   |_____|_____|...|______|
+        //  .   |_____|_____|...|______|
+        //  .   |_____|_____|...|______|
+        // y=M-1|_____|_____|...|______|
+
+
+        X_lin[0] = 0;      X_lin[1] = 256;    // 0,   1,  ...,149  (+1)
+        X_lin[150] = 256;  X_lin[151] = 0;    // 150, 151,...,299  (-1)
+        X_lin[300] = 512;  X_lin[301] = 0;    // 300, 301,...,449  (-1)
+        X_lin[450] = 512;  X_lin[451] = 256;  // 450, 451,...,599  (-1)
         //
         //  x     \  o
         //         \
@@ -280,6 +271,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //              \
         //  x         x  \  -1
         //             +1 \
+
+
+        // After adding the extra dimensions from 3D to 150D the above boundary moved to below in x-y plane???
+        //         x=0   x=10          x=256            x=512
+        // y=0   |(0,0) (10,0)     |  (0,256)          (0,512)
+        // y=10  |(0,10)           |
+        //       |                 |
+        //       |                 |
+        //       |                 |
+        //       |                 |
+        //       |                 |
+        // y=256 |(256,0)          |
+        //       |                 |
+        //       |                 |
+        //       |                 |
+        //       |                 |  (+1)
+        //       |                 |
+        // y=512 |(512,0)     (-1) |  (512,256)    (512,512)
+
+
 
         // Copy 1D array into 2D array:
         float[][] X_mat = new float[M][N];
@@ -296,8 +307,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Y[1] = -1;
         Y[2] = -1;
         Y[3] = -1;
-
-
 
         // Pass data matrix to svm in C++
         float[] arrayTest = new float[M * N];

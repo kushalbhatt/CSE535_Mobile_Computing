@@ -25,8 +25,8 @@ void train(Mat X, Mat Y)
 void svm_4x3(float* arrOut, float* arr1, float* arr2) // modify to take variable size n
 {
     // Set up training data
-    const size_t N = 3; // Features
     const size_t M = 4; // Examples
+    const size_t N = 3; // Features
 
     // 1D -> 2D
     float X_arr[M][N];
@@ -78,30 +78,41 @@ void svm_4x3(float* arrOut, float* arr1, float* arr2) // modify to take variable
     int tempc = 0;
     int tempd = 0;
 
-    // (0, 0) -> +1
+    // (0, 0) -> -1
     auto predict1 = svm->predict(mat1);
 
-    // (0, 511) -> +1
-    mat1.at<float>(0, 0) = 0;     mat1.at<float>(0, 1) = 511;
-    auto debug1_x0 =  mat1.at<float>(0, 0);
-    auto debug2_x0 =  mat1.at<float>(1, 0);
-    auto debug3_x0 =  mat1.at<float>(2, 0);
+
+    // (0, 10) -> -1
+    mat1.at<float>(0, 0) = 0;     mat1.at<float>(0, 1) = 10;
     auto predict2 = svm->predict(mat1);
 
-
-    // (511, 0) - > -1
-    mat1.at<float>(0, 0) = 511;     mat1.at<float>(0, 1) = 0;
-    auto debug1_x1 =  mat1.at<float>(0, 0);
-    auto debug2_x1 =  mat1.at<float>(1, 0);
-    auto debug3_x1 =  mat1.at<float>(2, 0);
+    // (10, 0) -> -1
+    mat1.at<float>(0, 0) = 10;     mat1.at<float>(0, 1) = 0;
     auto predict3 = svm->predict(mat1);
 
-    // (511, 511) -> +1
-    mat1.at<float>(0, 0) = 511;     mat1.at<float>(0, 1) = 511;
-    auto debug1_x2 =  mat1.at<float>(0, 0);
-    auto debug2_x2 =  mat1.at<float>(1, 0);
-    auto debug3_x2 =  mat1.at<float>(2, 0);
+    // (0, 512) - > +1
+    mat1.at<float>(0, 0) = 0;     mat1.at<float>(0, 1) = 512;
     auto predict4 = svm->predict(mat1);
+
+    // (511, 0) -> -1
+    mat1.at<float>(0, 0) = 512;     mat1.at<float>(0, 1) = 0;
+    auto predict5 = svm->predict(mat1);
+
+    // (512, 512) -> +1
+    mat1.at<float>(0, 0) = 512;     mat1.at<float>(0, 1) = 512;
+    auto predict6 = svm->predict(mat1);
+
+    // (0, 256) ->  +1
+    mat1.at<float>(0, 0) = 0;     mat1.at<float>(0, 1) = 256;
+    auto predict7 = svm->predict(mat1);
+
+    // (256, 0) -> -1
+    mat1.at<float>(0, 0) = 256;     mat1.at<float>(0, 1) = 0;
+    auto predict8 = svm->predict(mat1);
+
+    // (512, 256) -> +1
+    mat1.at<float>(0, 0) = 512;     mat1.at<float>(0, 1) = 256;
+    auto predict9 = svm->predict(mat1);
 
 
     // Copy data into arrOut if you want to return data to Java
@@ -174,7 +185,8 @@ JNIEXPORT jfloatArray JNICALL
 Java_com_example_racheldedinsky_group17assignment3_MainActivity_svm(JNIEnv *env, jobject instance,
                                                                     jfloatArray X_,
                                                                     jfloatArray Y_) {
-    const int N = 12;
+    const int M = 4;
+    const int N = M * 150;
 
     jfloatArray result;
     result = env->NewFloatArray(N);
