@@ -269,28 +269,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //            \
         //             \
         //              \
-        //  x         x  \  -1
-        //             +1 \
-
-
-        // After adding the extra dimensions from 3D to 150D the above boundary moved to below in x-y plane???
-        //         x=0   x=10          x=256            x=512
-        // y=0   |(0,0) (10,0)     |  (0,256)          (0,512)
-        // y=10  |(0,10)           |
-        //       |                 |
-        //       |                 |
-        //       |                 |
-        //       |                 |
-        //       |                 |
-        // y=256 |(256,0)          |
-        //       |                 |
-        //       |                 |
-        //       |                 |
-        //       |                 |  (+1)
-        //       |                 |
-        // y=512 |(512,0)     (-1) |  (512,256)    (512,512)
-
-
+        //  x         x  \ (-1)
+        //            (+1)\
 
         // Copy 1D array into 2D array:
         float[][] X_mat = new float[M][N];
