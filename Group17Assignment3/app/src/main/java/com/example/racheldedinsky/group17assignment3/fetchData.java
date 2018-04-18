@@ -145,6 +145,11 @@ public  class fetchData extends AppCompatActivity {
                     MainActivity.floatArray = myValues;
                     Log.d("main actvity array",MainActivity.floatArray[0][0]+"");
                     Log.d("float array",myValues[0][0]+"");
+
+                    // HERE IS THE CALL TO JOSH'S METHOD
+
+                    MainActivity.testCpp_interop();
+                    MainActivity.testOpenCV_interop();
                     cursor.close();
                     database.close();
                     return null;

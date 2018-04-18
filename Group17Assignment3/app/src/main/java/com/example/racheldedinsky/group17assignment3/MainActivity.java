@@ -215,86 +215,88 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return arr;
     }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    public void testCpp_interop() {
+    public static void testCpp_interop() {
+        Log.d("inside test cpp", floatArray[0][0]+"");
         // Test the C-function:
-        int n = 4;
-        float[] array3 = new float[n];
-        float[] array1 = new float[n];
-        float[] array2 = new float[n];
-
-        array1[0] = 0;      array1[1] = 1;
-        array1[2] = 2;      array1[3] = 3;
-
-        //array1[0] = 0;      array1[1] = 255;    array1[2] = 0;
-        //array1[3] = 255;    array1[4] = 0;      array1[5] = 0;
-        //array1[6] = 512;    array1[7] = 0;      array1[8] = 0;
-        //array1[9] = 512;    array1[10] = 255;   array1[11] = 0;
-
-        for (int i = 0; i < n; i++) {
-            array2[i] = array1[i];
-            array3[i] = 0;
-        }
-
-        //String temp_string = stringFromJNI();
-        array3 = test(array1, array2);
-        // if x = [0 1; 2 3]
-        // then x^2 = [2 3; 6 11]
-
-        int debug1 = 0;
+//        int n = 4;
+//        float[] array3 = new float[n];
+//        float[] array1 = new float[n];
+//        float[] array2 = new float[n];
+//
+//        array1[0] = 0;      array1[1] = 1;
+//        array1[2] = 2;      array1[3] = 3;
+//
+//        //array1[0] = 0;      array1[1] = 255;    array1[2] = 0;
+//        //array1[3] = 255;    array1[4] = 0;      array1[5] = 0;
+//        //array1[6] = 512;    array1[7] = 0;      array1[8] = 0;
+//        //array1[9] = 512;    array1[10] = 255;   array1[11] = 0;
+//
+//        for (int i = 0; i < n; i++) {
+//            array2[i] = array1[i];
+//            array3[i] = 0;
+//        }
+//
+//        //String temp_string = stringFromJNI();
+//        array3 = test(array1, array2);
+//        // if x = [0 1; 2 3]
+//        // then x^2 = [2 3; 6 11]
+//
+//        int debug1 = 0;
     }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    public void testOpenCV_interop() {
-        int M = 4, N = 150;
-        float[] X_lin = new float[M * N]; // Data matrix with M rows and N cols
-        for (int i = 0; i < M * N; ++i)
-            X_lin[i] = 0;
-        //  z=0
-        //     \  x=0   x=1  ...  x=N-1
-        //      \----------------------
-        // y=0  |_____|_____|...|______|
-        // y=1  |_____|_____|...|______|
-        //  .   |_____|_____|...|______|
-        //  .   |_____|_____|...|______|
-        //  .   |_____|_____|...|______|
-        // y=M-1|_____|_____|...|______|
-
-
-        X_lin[0] = 0;      X_lin[1] = 256;    // 0,   1,  ...,149  (+1)
-        X_lin[150] = 256;  X_lin[151] = 0;    // 150, 151,...,299  (-1)
-        X_lin[300] = 512;  X_lin[301] = 0;    // 300, 301,...,449  (-1)
-        X_lin[450] = 512;  X_lin[451] = 256;  // 450, 451,...,599  (-1)
-        //
-        //  x     \  o
-        //         \
-        //          \
-        //  x        \
-        //            \
-        //             \
-        //              \
-        //  x         x  \ (-1)
-        //            (+1)\
-
-        // Copy 1D array into 2D array:
-        float[][] X_mat = new float[M][N];
-        X_mat = one2twoD(X_lin, M, N);
-
-        // Copy 2D array into 1D array:
-        float[] X = new float[M * N];
-        X = two2oneD(X_mat, M, N);
-
-
-        // Target vector:
-        float[] Y = new float[M];
-        Y[0] = 1;
-        Y[1] = -1;
-        Y[2] = -1;
-        Y[3] = -1;
-
-        // Pass data matrix to svm in C++
-        float[] arrayTest = new float[M * N];
-        arrayTest = svm(X, Y);
-
-        int temp0 = 0;
+    public static void testOpenCV_interop() {
+        Log.d("inside testOpenCV",floatArray[0][0]+"");
+//        int M = 4, N = 150;
+//        float[] X_lin = new float[M * N]; // Data matrix with M rows and N cols
+//        for (int i = 0; i < M * N; ++i)
+//            X_lin[i] = 0;
+//        //  z=0
+//        //     \  x=0   x=1  ...  x=N-1
+//        //      \----------------------
+//        // y=0  |_____|_____|...|______|
+//        // y=1  |_____|_____|...|______|
+//        //  .   |_____|_____|...|______|
+//        //  .   |_____|_____|...|______|
+//        //  .   |_____|_____|...|______|
+//        // y=M-1|_____|_____|...|______|
+//
+//
+//        X_lin[0] = 0;      X_lin[1] = 256;    // 0,   1,  ...,149  (+1)
+//        X_lin[150] = 256;  X_lin[151] = 0;    // 150, 151,...,299  (-1)
+//        X_lin[300] = 512;  X_lin[301] = 0;    // 300, 301,...,449  (-1)
+//        X_lin[450] = 512;  X_lin[451] = 256;  // 450, 451,...,599  (-1)
+//        //
+//        //  x     \  o
+//        //         \
+//        //          \
+//        //  x        \
+//        //            \
+//        //             \
+//        //              \
+//        //  x         x  \ (-1)
+//        //            (+1)\
+//
+//        // Copy 1D array into 2D array:
+//        float[][] X_mat = new float[M][N];
+//        X_mat = one2twoD(X_lin, M, N);
+//
+//        // Copy 2D array into 1D array:
+//        float[] X = new float[M * N];
+//        X = two2oneD(X_mat, M, N);
+//
+//
+//        // Target vector:
+//        float[] Y = new float[M];
+//        Y[0] = 1;
+//        Y[1] = -1;
+//        Y[2] = -1;
+//        Y[3] = -1;
+//
+//        // Pass data matrix to svm in C++
+//        float[] arrayTest = new float[M * N];
+//        arrayTest = svm(X, Y);
+//
+//        int temp0 = 0;
     }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
