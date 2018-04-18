@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     DBHandler dbHandler = new DBHandler(this);
     //table name for the database
     String tablename = "TEST";
+    public static float[][] floatArray;
 
     public native String stringFromJNI();
     public native float[] svm(float[] X, float[] Y);
@@ -159,8 +160,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                 // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+
                 //testCpp_interop();
-                testOpenCV_interop();
+                //testOpenCV_interop();
 
                 break;
         }

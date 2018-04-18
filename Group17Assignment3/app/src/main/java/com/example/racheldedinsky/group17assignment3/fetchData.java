@@ -19,6 +19,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 public  class fetchData extends AppCompatActivity {
 
+    public static float myValues[][];
     fetchData(){
 
     }
@@ -105,7 +106,6 @@ public  class fetchData extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(String... strings) {
 
-        float[][] myValues;
             try {
 
                 SQLiteDatabase database = SQLiteDatabase.openDatabase(Environment.getExternalStorageDirectory().getPath() + "/CSE535_ASSIGNMENT3/activityDB.db", null, 0);
@@ -117,20 +117,34 @@ public  class fetchData extends AppCompatActivity {
                     myValues = new float[cursor.getCount()][152];
                     if(cursor.moveToFirst()){
                         for(int i=1;i<cursor.getCount();i++){
-                            for(int j=1;j<152;j++){
+                            for(int j=1;j<151;j++){
                                 Float val = cursor.getFloat(j);
                                 myValues[i-1][j-1]=val;
                                 Log.d("val",""+val);
 
 
                             }
+                            String activity = cursor.getString(151);
+                            if(activity=="Walk"){
+                                myValues[i-1][151] = 0;
+                            }
+                            else if(activity=="Run"){
+                                myValues[i-1][151] =1;
+                            }
+                            else{
+                                myValues[i-1][151]  = -1;
+                            }
+                            Log.d("label",myValues[i-1][151]+"");
                             Log.d("new row","---------");
                             cursor.moveToNext();
 
                         }
 
+
                     }
-                    Log.d("float array",myValues+"");
+                    MainActivity.floatArray = myValues;
+                    Log.d("main actvity array",MainActivity.floatArray[0][0]+"");
+                    Log.d("float array",myValues[0][0]+"");
                     cursor.close();
                     database.close();
                     return null;
