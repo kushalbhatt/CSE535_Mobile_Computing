@@ -90,7 +90,7 @@
         android:layout_width="180dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="40dp"
-        android:text="Train"
+        android:text="Record Activity"
         app:layout_constraintBottom_toTopOf="@+id/progressBarWalk"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/walk"
@@ -129,22 +129,27 @@
         android:id="@+id/jump"
         android:layout_width="138dp"
         android:layout_height="21dp"
-        android:layout_marginBottom="219dp"
+        android:layout_marginBottom="216dp"
         android:text="Jump"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.68"
         app:layout_constraintStart_toEndOf="@+id/progressBarJump" />
 
     <Button
         android:id="@+id/test_button"
-        android:layout_width="368dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="27dp"
-        android:text="Test"
-        app:layout_constraintEnd_toEndOf="@+id/progressBarJump"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="24dp"
+        android:text="Train Model"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/progressBarJump"
-        app:layout_constraintTop_toBottomOf="@+id/jump" />
+        app:layout_constraintTop_toBottomOf="@+id/jump"
+        app:layout_constraintVertical_bias="0.155" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline"
@@ -159,5 +164,21 @@
         android:layout_height="wrap_content"
         tools:layout_editor_absoluteX="163dp"
         tools:layout_editor_absoluteY="401dp" />
+
+    <Button
+        android:id="@+id/predict_button"
+        android:layout_width="164dp"
+        android:layout_height="56dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Predict"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/test_button"
+        app:layout_constraintHorizontal_bias="0.275"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progressBarJump"
+        app:layout_constraintVertical_bias="0.234" />
 
 </android.support.constraint.ConstraintLayout>

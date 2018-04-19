@@ -13,8 +13,16 @@ import android.widget.ProgressBar;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+
+    // Note: Names of buttons in the GUI is now:
+    // Record  (was called train)
+    // Train   (was called test)
+    // Predict (did not exist)
+
+
     //Instatiate the button variables
-    static Button train_button_var, test_button_var;
+    static Button train_button_var, test_button_var, predict_button_var;
+
     //This is the number of training data sets taken
     int trainWalkCount, trainRunCount, trainJumpCount;
     //train button can't be hit unless train_enabled is true
@@ -53,10 +61,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         trainRunCount=0;
         //Initialize the app view
         initView();
-
-
-
-
     }
     @Override
     protected void onDestroy() {
@@ -149,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.test_button:
+                Toast.makeText(getApplicationContext(), "Training model. Hold on!", Toast.LENGTH_SHORT).show();
                 fetchData fd = new fetchData();
                 fd.executeTask();
 
@@ -165,6 +170,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //testOpenCV_interop();
 
                 break;
+
+
+            case R.id.predict_button:
+
+                Toast.makeText(getApplicationContext(), "Predict button pressed.", Toast.LENGTH_SHORT).show();
+
+                break; // end predict_button junk
         }
     }
     static public void enableButton(boolean train_enable)
@@ -187,11 +199,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         progressBar_jump_var.setMax(20);
 
         test_button_var = findViewById(R.id.test_button);
-        train_button_var= findViewById(R.id.train_button);
+        train_button_var = findViewById(R.id.train_button);
+        predict_button_var = findViewById(R.id.predict_button);
+
 
         // Set on-click listeners to buttons (described here: https://www.youtube.com/watch?v=GtxVILjLcw8K)
         test_button_var.setOnClickListener(this);
         train_button_var.setOnClickListener(this);
+        predict_button_var.setOnClickListener(this);
 
     }
     //==============================================================================================
@@ -216,7 +231,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     public static void testCpp_interop() {
-        Log.d("inside test cpp", floatArray[0][0]+"");
+        Log.d("inside test cpp", floatArray[0][25]+"");
+
+        int temp = 0;
         // Test the C-function:
 //        int n = 4;
 //        float[] array3 = new float[n];
@@ -300,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    public void train(float[][] X, float[] Y, int M, int N) {
+    public void train(float[][] AshniMatrix) {
         // Method train does the following:
         // Step 1: Hand me the 2D data matrix and 1D target vector
         // Step 2: Convert X to a 1D array
@@ -309,16 +326,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Step 5: Store W,b
         //
         // Input args:
-        //  X:  M x N data matrix
-        //  Y:  M x 1 target vector
-        //  M:  Number of training examples
-        //  N:  Number of features
+        /// AshiMatrix: 60 x 151 matrix. Right most column contains target vector.
+        //      Extract: X:  M x N data matrix
+        //               Y:  M x 1 target vector
+        //                   M:  Number of training examples
+        //                   N:  Number of features
         // Output args:
         //  none
 
+        /// Extract right most column from AshniMatrix
+        ///     Place data matrix in X and target vector in Y:
+        int M = 60; int N = 150;
+        float[][] X = new float[M][N];
+        for (int i = 0; i < M; ++i) { // itterate down rows
+            for (int j = 0; j < N; ++j) { // itterate acrros columns right-wardly :)
+                // Extract left block matrix
+                X[i][j] = AshniMatrix[i][j]; // Ignore that right most column
+            }
+        }
+        float[] Y = new float[M];
+        for (int i = 0; i < M; ++i)
+            Y[i] = AshniMatrix[i][150];  // Itterate down rows of right-most column
+            // Need to cast to int
+
         // Copy 2D array into 1D array:
-        float[] X_lin = new float[M * N];
-        X_lin = two2oneD(X, M, N);
+        float[] X_lin = two2oneD(X, M, N);
 
         // Pass into C++
         SVM_train(X_lin, Y);
