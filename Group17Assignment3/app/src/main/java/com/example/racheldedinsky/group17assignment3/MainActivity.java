@@ -286,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     float debugVar = TrainingAccuracy * TrainingAccuracy;
                     debugCount += debugVar;
                 }
-                float finalDebugVal = debugCount / (float)M;
+                //float finalDebugVal = debugCount / (float)M;
 
 
 
