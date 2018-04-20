@@ -45,24 +45,50 @@ public class GraphActivity extends AppCompatActivity {
         SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(Environment.getExternalStorageDirectory().getPath()
                 + "/CSE535_ASSIGNMENT3/activityDB.db", null);
 
-        Cursor rowData = db.rawQuery("SELECT * FROM Test", null);
+        Cursor walkData = db.rawQuery("SELECT * FROM Test where ActivityID like 'w%' limit 20", null);
+        Cursor runData = db.rawQuery("SELECT * FROM Test where ActivityID like 'r%' limit 20", null);
+        Cursor jumpData = db.rawQuery("SELECT * FROM Test where ActivityID like 'j%' limit 20", null);
         final float[][][] dataArray;
-        dataArray = new float[rowData.getCount()][3][50];
+        dataArray = new float[60][3][50];
         int column = 0;
         int row = 0;
-        while (rowData.moveToNext()) {
+        while (walkData.moveToNext()) {
             column=0;
             for (int i = 1; i <= 150; i+=3) {
-                dataArray[row][0][column] = rowData.getFloat(i);
-                dataArray[row][1][column] = rowData.getFloat(i+1);
-                dataArray[row][2][column] = rowData.getFloat(i+2);
+                dataArray[row][0][column] = walkData.getFloat(i);
+                dataArray[row][1][column] = walkData.getFloat(i+1);
+                dataArray[row][2][column] = walkData.getFloat(i+2);
                 Log.d("array","row "+ row +" "+dataArray[row][0][column]+" "+dataArray[row][1][column]+" "+ dataArray[row][2][column]);
                 column++;
             }
             row++;
 
         }
-        Log.d("array", dataArray[rowData.getCount()-1][0][49]+" "+dataArray[rowData.getCount()-1][1][49]);
+        while (runData.moveToNext()) {
+            column=0;
+            for (int i = 1; i <= 150; i+=3) {
+                dataArray[row][0][column] = runData.getFloat(i);
+                dataArray[row][1][column] = runData.getFloat(i+1);
+                dataArray[row][2][column] = runData.getFloat(i+2);
+                Log.d("array","row "+ row +" "+dataArray[row][0][column]+" "+dataArray[row][1][column]+" "+ dataArray[row][2][column]);
+                column++;
+            }
+            row++;
+
+        }
+        while (jumpData.moveToNext()) {
+            column=0;
+            for (int i = 1; i <= 150; i+=3) {
+                dataArray[row][0][column] = jumpData.getFloat(i);
+                dataArray[row][1][column] = jumpData.getFloat(i+1);
+                dataArray[row][2][column] = jumpData.getFloat(i+2);
+                Log.d("array","row "+ row +" "+dataArray[row][0][column]+" "+dataArray[row][1][column]+" "+ dataArray[row][2][column]);
+                column++;
+            }
+            row++;
+
+        }
+        //Log.d("array", dataArray[rowData.getCount()-1][0][49]+" "+dataArray[rowData.getCount()-1][1][49]);
 
         visualGraph.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
