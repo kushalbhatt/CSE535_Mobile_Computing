@@ -10,7 +10,18 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 import android.widget.TextView;
 import android.widget.ProgressBar;
+
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.core.TermCriteria;
+import org.opencv.ml.Ml;
+import org.opencv.ml.SVM;
+
 import java.util.concurrent.TimeUnit;
+
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -18,6 +29,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // Record  (was called train)
     // Train   (was called test)
     // Predict (did not exist)
+
+    // Training Dataset:
+    static int M = 60; // Rows - examples
+    static int N = 150;  // Cols - features
+    public static Mat Y;// = Mat.zeros(M, 1, CvType.CV_32SC1);   // Integer {-1, 0, +1}
+    public static Mat X;// = Mat.zeros(M, N, CvType.CV_32FC1); // Float
+    public static float[][] dataset_2Darr;
+
+    private static final String TAG = "mytag";
+    static {
+        if(OpenCVLoader.initDebug()) {
+            Log.d(TAG, "OpenCV successfully loaded");
+        }
+        else {
+            Log.d(TAG, "OpenCV not loaded");
+        }
+    }
 
 
     //Instatiate the button variables
@@ -35,13 +63,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     DBHandler dbHandler = new DBHandler(this);
     //table name for the database
     String tablename = "TEST";
-    public static float[][] floatArray;
+    
+    
+    
 
-    public native String stringFromJNI();
-    public native float[] svm(float[] X, float[] Y);
-    public native float[] test(float[] arr1, float[] arr2);
-    public native float[] SVM_train(float[] X, float[] Y); // MxN data matrix and Mx1 target vector
-    public native float[] SVM_predict(float[] x); // pass in single feature vector
+    //public native String stringFromJNI();
+    //public native float[] test(float[] arr1, float[] arr2);
+    //public static native float[] svm(float[] X, float[] Y);        // train model
+    //public native float[] svm_predict(float[] x);
+
+
+
+    // Instantiate SVM object globally
+    static SVM classifier = SVM.create();
 
 
     static {
@@ -61,6 +95,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         trainRunCount=0;
         //Initialize the app view
         initView();
+
+        // SVM Stuff:
+        classifier.setKernel(SVM.CHI2);
+        classifier.setType(SVM.C_SVC);
+        classifier.setGamma(0.5);
+        classifier.setNu(0.5);
+        classifier.setC(3);
+        //classifier.setTermCriteria(criteria);
+
+        // Dataset stuff:
+        //Y = new Mat(new Size(1,M),CvType.CV_32SC1); // Integer {-1, 0, +1}
+        Y = Mat.zeros(M, 1, CvType.CV_32SC1);
+        int Y_rows = Y.rows(); // 60
+        int Y_cols = Y.cols(); // 1
+
+        //X = new Mat(new Size(N,M),CvType.CV_32FC1); // Float
+        X = Mat.zeros(M, N, CvType.CV_32FC1);
+        int X_rows = X.rows(); // 60
+        int X_cols = X.cols(); // 150
+
     }
     @Override
     protected void onDestroy() {
@@ -157,26 +211,57 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 fetchData fd = new fetchData();
                 fd.executeTask();
 
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+                int temp0 = 0;
+
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
                 //testCpp_interop();
                 //testOpenCV_interop();
 
                 break;
 
-
             case R.id.predict_button:
 
-                Toast.makeText(getApplicationContext(), "Predict button pressed.", Toast.LENGTH_SHORT).show();
 
-                break; // end predict_button junk
+                Toast.makeText(getApplicationContext(), "Predict Pressed", Toast.LENGTH_SHORT).show();
+
+
+                // PROTOTYPE of feature vector:
+                Mat x = Mat.zeros(1, N, CvType.CV_32FC1);
+                int x_rows = x.rows(); // 1
+                int x_cols = x.cols(); // 150
+                for (int i = 0; i < 150; i++) {
+                    x.put(0, i, 0.2f);
+                }
+
+
+
+                // Train the model using X and Y
+                classifier.train(X, Ml.ROW_SAMPLE, Y);
+
+
+                Mat getClassWeights = classifier.getClassWeights();
+                TermCriteria getTermCriteria = classifier.getTermCriteria();
+                boolean isTrained = classifier.isTrained();
+
+                Mat outMat = new Mat();
+                float response = classifier.predict(x, outMat, 0);
+
+
+
+                x = new Mat(new Size(1,150),CvType.CV_32SC1); // Integer {-1, 0, +1}
+                int Y_rows = Y.rows(); // 60
+                int Y_cols = Y.cols(); // 1
+
+
+                break; // end predict_button
         }
     }
     static public void enableButton(boolean train_enable)
@@ -210,17 +295,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
     //==============================================================================================
-    public float[][] one2twoD(float[] arr, int rows, int cols) {
-        float[][] mat = new float[rows][cols]; // Data matrix with M rows and N cols
-        for (int i = 0; i < rows; ++i) {
-            for (int j = 0; j < cols; ++j){
-                mat[i][j] = arr[i * cols + j]; // Count up in row-major fashion
-            } // end for over j
-        } // end for over i
-        return mat;
-    }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    public float[] two2oneD(float[][] mat, int rows, int cols) {
+    public static float[] two2oneD(float[][] mat, int rows, int cols) {
         float[] arr = new float[rows * cols]; // Data matrix with M rows and N cols
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j){
@@ -230,94 +306,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return arr;
     }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    public static void testCpp_interop() {
-        Log.d("inside test cpp", floatArray[0][25]+"");
-
-        int temp = 0;
-        // Test the C-function:
-//        int n = 4;
-//        float[] array3 = new float[n];
-//        float[] array1 = new float[n];
-//        float[] array2 = new float[n];
-//
-//        array1[0] = 0;      array1[1] = 1;
-//        array1[2] = 2;      array1[3] = 3;
-//
-//        //array1[0] = 0;      array1[1] = 255;    array1[2] = 0;
-//        //array1[3] = 255;    array1[4] = 0;      array1[5] = 0;
-//        //array1[6] = 512;    array1[7] = 0;      array1[8] = 0;
-//        //array1[9] = 512;    array1[10] = 255;   array1[11] = 0;
-//
-//        for (int i = 0; i < n; i++) {
-//            array2[i] = array1[i];
-//            array3[i] = 0;
-//        }
-//
-//        //String temp_string = stringFromJNI();
-//        array3 = test(array1, array2);
-//        // if x = [0 1; 2 3]
-//        // then x^2 = [2 3; 6 11]
-//
-//        int debug1 = 0;
-    }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    public static void testOpenCV_interop() {
-        Log.d("inside testOpenCV",floatArray[0][0]+"");
-//        int M = 4, N = 150;
-//        float[] X_lin = new float[M * N]; // Data matrix with M rows and N cols
-//        for (int i = 0; i < M * N; ++i)
-//            X_lin[i] = 0;
-//        //  z=0
-//        //     \  x=0   x=1  ...  x=N-1
-//        //      \----------------------
-//        // y=0  |_____|_____|...|______|
-//        // y=1  |_____|_____|...|______|
-//        //  .   |_____|_____|...|______|
-//        //  .   |_____|_____|...|______|
-//        //  .   |_____|_____|...|______|
-//        // y=M-1|_____|_____|...|______|
-//
-//
-//        X_lin[0] = 0;      X_lin[1] = 256;    // 0,   1,  ...,149  (+1)
-//        X_lin[150] = 256;  X_lin[151] = 0;    // 150, 151,...,299  (-1)
-//        X_lin[300] = 512;  X_lin[301] = 0;    // 300, 301,...,449  (-1)
-//        X_lin[450] = 512;  X_lin[451] = 256;  // 450, 451,...,599  (-1)
-//        //
-//        //  x     \  o
-//        //         \
-//        //          \
-//        //  x        \
-//        //            \
-//        //             \
-//        //              \
-//        //  x         x  \ (-1)
-//        //            (+1)\
-//
-//        // Copy 1D array into 2D array:
-//        float[][] X_mat = new float[M][N];
-//        X_mat = one2twoD(X_lin, M, N);
-//
-//        // Copy 2D array into 1D array:
-//        float[] X = new float[M * N];
-//        X = two2oneD(X_mat, M, N);
-//
-//
-//        // Target vector:
-//        float[] Y = new float[M];
-//        Y[0] = 1;
-//        Y[1] = -1;
-//        Y[2] = -1;
-//        Y[3] = -1;
-//
-//        // Pass data matrix to svm in C++
-//        float[] arrayTest = new float[M * N];
-//        arrayTest = svm(X, Y);
-//
-//        int temp0 = 0;
-    }
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    public void train(float[][] AshniMatrix) {
+    public static void train() {
         // Method train does the following:
         // Step 1: Hand me the 2D data matrix and 1D target vector
         // Step 2: Convert X to a 1D array
@@ -326,46 +316,118 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Step 5: Store W,b
         //
         // Input args:
-        /// AshiMatrix: 60 x 151 matrix. Right most column contains target vector.
+        /// dataset_2Darr: 60 x 151 matrix. Right most column contains target vector.
         //      Extract: X:  M x N data matrix
         //               Y:  M x 1 target vector
         //                   M:  Number of training examples
         //                   N:  Number of features
         // Output args:
         //  none
+        Log.d("inside testOpenCV",dataset_2Darr[0][0]+"");
 
-        /// Extract right most column from AshniMatrix
-        ///     Place data matrix in X and target vector in Y:
-        int M = 60; int N = 150;
-        float[][] X = new float[M][N];
-        for (int i = 0; i < M; ++i) { // itterate down rows
-            for (int j = 0; j < N; ++j) { // itterate acrros columns right-wardly :)
-                // Extract left block matrix
-                X[i][j] = AshniMatrix[i][j]; // Ignore that right most column
+        /// Extract right most column from Ashni's Matrix
+        ///     Place data matrix in X and target vector in Y
+        float temp;
+        double[] temp2;
+        for (int i=0; i < M; i++) {
+            for(int j=0; j < N; j++) {
+                X.put(i, j, dataset_2Darr[i][j]); // Copy 2D array into mat object
             }
         }
-        float[] Y = new float[M];
+
+
+        int debug2 = 0;;
+
+        // Itterate down rows of right-most column
         for (int i = 0; i < M; ++i)
-            Y[i] = AshniMatrix[i][150];  // Itterate down rows of right-most column
-            // Need to cast to int
+            Y.put(i,0, (int)dataset_2Darr[i][150]); // Copy 2D array into mat object
 
-        // Copy 2D array into 1D array:
-        float[] X_lin = two2oneD(X, M, N);
 
-        // Pass into C++
-        SVM_train(X_lin, Y);
-    }
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    public void predict(float[] x, int N) {
-        // Function SVM_predict:
-        // Input args:
-        //  x:    N-dimensional feature vector
-        //  N:      Number of dimensions of x
-        // Output args:
-        //  none
 
-        // Pass into C++
-        SVM_predict(x);
+        // Train the model using X and Y
+        classifier.train(X, Ml.ROW_SAMPLE, Y);
+
+
     }
     //==============================================================================================
+    public float accuracy() {
+
+        /*
+        /// Extract right most column from Ashni's Matrix
+        ///     Place data matrix in X and target vector in Y
+        float temp;
+        double[] temp2;
+        for (int i=0; i < M; i++) {
+            for(int j=0; j < N; j++) {
+                temp = dataset_2Darr[i][j];
+                temp2 = X.get(i, j);
+                int debug = i * j;
+                //X.put(i, j, dataset_2Darr[i][j]); // Copy 2D array into mat object
+            }
+        }
+        */
+
+        // Feature vector (1xN)
+        Mat x = Mat.zeros(1, N, CvType.CV_32FC1);
+        float response = classifier.predict(x);
+
+        // Try with X
+        // Try with x
+
+
+        //Mat results = new Mat();
+        //classifier.predict(x, results, 0);
+
+
+        //int count = 0;
+
+        // Iterate over the examples
+        for (int i = 0; i < M; ++i) {
+
+            // Extract row of X
+
+            for (int j = 0; j < N; ++j) {
+                int tempDebug = 0;
+                //x.put(0, j, X.get(i, j)); // Individual feature vector for one example
+            }
+
+
+
+            // Problem is right here
+            //float p = classifier.predict(x);
+
+            // Questions:
+            //  -What form is predict expecting?
+
+
+
+            //cv::Size size(N, 1);
+            //Mat mat1 = Mat::zeros(size, CV_32FC1);
+            //mat1.at<float>(0, 1) = 256;
+
+
+
+            //double[] labels = Y.get(i,0);
+
+            // NOT SURE OF THIS
+            //double t = labels[0];
+
+            // There is a ternary split in the real line for our classification:
+            // (-infinity)---------(-1)---------(0)---------(+1)---------(+infinity)
+            //                   Class 1  |   Class 2   |  Class 3
+            // Activity 1: -infinity < prediction < -0.5
+            // Activity 2: -0.5 < prediction < +0.5
+            // Activity 3: +0.5 < prediction < infinity
+
+/*
+            if ( ( p < -0.5  &&  t < -0.5 ) ||
+               ( (-0.5 <= p  &&  p < 0.5) && (-0.5 <= t  &&  t < 0.5) ) ||
+               ( ( 0.5 <= p  &&  0.5 <= t ) ) ) {
+                count++;
+            }
+*/
+
+        }
+        return 0.0f;//(float)count / (float)M;
+    }
 }

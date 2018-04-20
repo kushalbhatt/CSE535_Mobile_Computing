@@ -22,10 +22,10 @@ void train(Mat X, Mat Y)
     svm->train(X, ROW_SAMPLE, Y);
 }
 //=====================================
-void svm_4x150(float* arrOut, float* arr1, float* arr2) // modify to take variable size n
+void svm_60x150(float* arrOut, float* arr1, float* arr2)
 {
     // Set up training data
-    const size_t M = 4; // Examples
+    const size_t M = 60; // Examples
     const size_t N = 150; // Features
 
     // 1D -> 2D
@@ -37,12 +37,12 @@ void svm_4x150(float* arrOut, float* arr1, float* arr2) // modify to take variab
         {
             X_arr[i][j] = arr1[i * N + j];
         }
-        Y_arr[i][0] = static_cast<int>(arr2[i]);
+        Y_arr[i][0] = static_cast<int>(arr2[i]); // svm function expects target vector to by int
     }
 
     // Copy arr into Mat
     Mat X(M, N, CV_32FC1, X_arr);
-    Mat Y(M, 1, CV_32SC1, Y_arr);  // TO FIX THIS JUST PUT Y in a 2D array then pass it in here
+    Mat Y(M, 1, CV_32SC1, Y_arr);
 
     // Train the SVM:
     train(X, Y);
@@ -54,7 +54,20 @@ void svm_4x150(float* arrOut, float* arr1, float* arr2) // modify to take variab
     // Copy data into arrOut if you want to return data to Java
     arrOut[0] = 0;
 }
+//=========================================================
+void svm_predict(float* arrOut, float* arr1)
+{
+    const size_t N = 150;
+    // to-do:
+    // take x as input
+    // copy into opencv mat object
+    // pass into svm->predict(x_mat)
+    // return auto return_val = svm->predict(x_mat) in arrOut[0,1,...,149]
 
+    // Test out return array:
+    for (int i = 0; i < N; ++i)
+        arrOut[i] = i + 1;
+}
 //=========================================================
 void mat_mult(float* arr3, float* arr1, float* arr2, int n)
 {
@@ -121,7 +134,7 @@ JNIEXPORT jfloatArray JNICALL
 Java_com_example_racheldedinsky_group17assignment3_MainActivity_svm(JNIEnv *env, jobject instance,
                                                                     jfloatArray X_,
                                                                     jfloatArray Y_) {
-    const int M = 4;
+    const int M = 60;
     const int N = M * 150;
 
     jfloatArray result;
@@ -130,20 +143,47 @@ Java_com_example_racheldedinsky_group17assignment3_MainActivity_svm(JNIEnv *env,
         return NULL; // out of memory error thrown
     }
 
-    // increase to len-4
     jfloat array1[N];
     jfloat* flt1 = env->GetFloatArrayElements( X_, 0 );
     jfloat* flt2 = env->GetFloatArrayElements( Y_, 0 );
 
     // Pass flt1 into the SVM function
     float vecRtrn[N];
-    svm_4x150(vecRtrn, flt1, flt2);
+    svm_60x150(vecRtrn, flt1, flt2);
 
     // Copy data from C++ float array to the funky jfloatArray type - put in function to get out of sight
     for (int i = 0; i < N; i++) // Copy to output array
         array1[i] = vecRtrn[i];
     env->ReleaseFloatArrayElements( X_, flt1, 0 );
     env->ReleaseFloatArrayElements( Y_, flt2, 0);
+    env->SetFloatArrayRegion(result, 0, N, array1); // Range: [0,N]
+    return result;
+}
+//========
+extern "C"
+JNIEXPORT jfloatArray JNICALL
+Java_com_example_racheldedinsky_group17assignment3_MainActivity_svm_1predict(JNIEnv *env,
+                                                                             jfloatArray x_) {
+
+    const int N = 150;
+
+    jfloatArray result;
+    result = env->NewFloatArray(N);
+    if (result == NULL) {
+        return NULL; // out of memory error thrown
+    }
+
+    jfloat array1[N];
+    jfloat* flt1 = env->GetFloatArrayElements( x_, 0 );
+
+    // Pass flt1 into the SVM function
+    float vecRtrn[N];
+    svm_predict(vecRtrn, flt1);
+
+    // Copy data from C++ float array to the funky jfloatArray type
+    for (int i = 0; i < N; i++) // Copy to output array
+        array1[i] = vecRtrn[i];
+    env->ReleaseFloatArrayElements( x_, flt1, 0 );
     env->SetFloatArrayRegion(result, 0, N, array1); // Range: [0,N]
     return result;
 }

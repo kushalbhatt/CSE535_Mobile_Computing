@@ -8,6 +8,12 @@ import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.core.TermCriteria;
+import org.opencv.ml.Ml;
+
 import java.io.File;
 import java.io.FileWriter;
 
@@ -28,7 +34,7 @@ public  class fetchData extends AppCompatActivity {
     public void executeTask(){
         Log.d(" fetch data","Hi");
         new CreateCSV().execute();
-        new CreateFloatArray().execute();
+        new Createdataset_2Darr().execute();
     }
 
     class CreateCSV extends AsyncTask<String, Void, Boolean> {
@@ -101,7 +107,7 @@ public  class fetchData extends AppCompatActivity {
 
     }
 
-    class CreateFloatArray extends AsyncTask<String, Void, Boolean> {
+    class Createdataset_2Darr extends AsyncTask<String, Void, Boolean> {
 
         @Override
         protected Boolean doInBackground(String... strings) {
@@ -142,14 +148,54 @@ public  class fetchData extends AppCompatActivity {
 
 
                     }
-                    MainActivity.floatArray = myValues;
-                    Log.d("main actvity array",MainActivity.floatArray[0][0]+"");
+                    MainActivity.dataset_2Darr = myValues;
+                    Log.d("main actvity array",MainActivity.dataset_2Darr[0][0]+"");
                     Log.d("float array",myValues[0][0]+"");
 
-                    // HERE IS THE CALL TO JOSH'S METHOD
 
-                    MainActivity.testCpp_interop();
-                    MainActivity.testOpenCV_interop();
+                    // Copy data into X and Y
+
+                    for (int i=0; i < 60; i++) {
+                        for(int j=0; j < 150; j++) {
+                            MainActivity.X.put(i, j, MainActivity.dataset_2Darr[i][j]); // Copy 2D array into mat object
+                        }
+                    }
+
+                    // Itterate down rows of right-most column
+                    for (int i = 0; i < 60; ++i)
+                        MainActivity.Y.put(i,0, (int)MainActivity.dataset_2Darr[i][150]); // Copy 2D array into mat object
+
+
+                    boolean isTrained = MainActivity.classifier.isTrained();
+
+                    // Train the model using X and Y
+                    MainActivity.classifier.train(MainActivity.X, Ml.ROW_SAMPLE, MainActivity.Y);
+
+                    isTrained = MainActivity.classifier.isTrained();
+                    int getType = MainActivity.classifier.getType();
+                    Mat getClassWeights = MainActivity.classifier.getClassWeights();
+                    TermCriteria getTermCriteria = MainActivity.classifier.getTermCriteria();
+
+
+                    // PROTOTYPE:
+                    Mat x = new Mat(new Size(150, 1),CvType.CV_32FC1); // Float
+                    int x_rows = x.rows(); // 1
+                    int x_cols = x.cols(); // 150
+                    for (int i = 0; i < 150; i++) {
+                        x.put(0, i, 0.2f);
+                    }
+
+
+
+
+                    //Mat outMat = new Mat();
+                    //float response = MainActivity.classifier.predict(x, outMat, 0);
+                    float prediction = MainActivity.classifier.predict(x);
+
+
+
+
+
                     cursor.close();
                     database.close();
                     return null;
