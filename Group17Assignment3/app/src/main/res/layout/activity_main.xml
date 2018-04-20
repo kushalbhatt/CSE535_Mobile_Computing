@@ -181,4 +181,14 @@
         app:layout_constraintTop_toBottomOf="@+id/progressBarJump"
         app:layout_constraintVertical_bias="0.234" />
 
+    <Button
+        android:id="@+id/visualization"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Visualization"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/predict_button" />
+
 </android.support.constraint.ConstraintLayout>

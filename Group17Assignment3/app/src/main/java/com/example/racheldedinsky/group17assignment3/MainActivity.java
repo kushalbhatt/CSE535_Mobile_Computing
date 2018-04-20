@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     //Instatiate the button variables
-    static Button train_button_var, test_button_var, predict_button_var;
+    static Button train_button_var, test_button_var, predict_button_var, visualization;
 
     //This is the number of training data sets taken
     int trainWalkCount, trainRunCount, trainJumpCount;
@@ -93,6 +93,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         trainWalkCount=0;
         trainJumpCount=0;
         trainRunCount=0;
+        visualization = findViewById(R.id.visualization);
+        visualization.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(MainActivity.this, GraphActivity.class);
+                startActivity(i);
+            }
+        });
         //Initialize the app view
         initView();
 
