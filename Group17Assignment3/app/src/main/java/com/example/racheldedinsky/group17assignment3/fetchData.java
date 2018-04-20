@@ -26,10 +26,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 public  class fetchData extends AppCompatActivity {
 
     public static float myValues[][];
-    fetchData(){
-
-    }
-
+    fetchData(){}
 
     public void executeTask(){
         Log.d(" fetch data","Hi");
@@ -41,7 +38,6 @@ public  class fetchData extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(String... strings) {
-
 
             try {
 
@@ -55,8 +51,6 @@ public  class fetchData extends AppCompatActivity {
                     exportDir.mkdirs();
                 }
                 File file = new File(exportDir, "excerDB.csv");
-
-
 
                 try {
                     file.createNewFile();
@@ -127,8 +121,6 @@ public  class fetchData extends AppCompatActivity {
                                 Float val = cursor.getFloat(j);
                                 myValues[i-1][j-1]=val;
                                 Log.d("val",""+val);
-
-
                             }
                             String activity = cursor.getString(151);
                             if(activity=="Walk"){
@@ -143,78 +135,102 @@ public  class fetchData extends AppCompatActivity {
                             Log.d("label",myValues[i-1][151]+"");
                             Log.d("new row","---------");
                             cursor.moveToNext();
-
                         }
-
-
                     }
                     MainActivity.dataset_2Darr = myValues;
                     Log.d("main actvity array",MainActivity.dataset_2Darr[0][0]+"");
                     Log.d("float array",myValues[0][0]+"");
 
+                    // JOSH - - - - - - - - - - - - Inside the fetchData Async Task
+                    // JOSH - - - - - - - - - - - - Inside the fetchData Async Task
+                    // JOSH - - - - - - - - - - - - Inside the fetchData Async Task
+                    // JOSH - - - - - - - - - - - - Inside the fetchData Async Task
+                    // JOSH - - - - - - - - - - - - Inside the fetchData Async Task
+
+                    // Training is done here.
+                    // First copy the 2D float array into data matrix X and target vector Y
+                    // Then construct model via train(X,Y)
 
                     // Copy data into X and Y
-
                     for (int i=0; i < 60; i++) {
                         for(int j=0; j < 150; j++) {
                             MainActivity.X.put(i, j, MainActivity.dataset_2Darr[i][j]); // Copy 2D array into mat object
                         }
                     }
-
                     // Itterate down rows of right-most column
                     for (int i = 0; i < 60; ++i)
-                        MainActivity.Y.put(i,0, (int)MainActivity.dataset_2Darr[i][150]); // Copy 2D array into mat object
-
-
-                    boolean isTrained = MainActivity.classifier.isTrained();
+                        MainActivity.Y.put(i,0, (int)MainActivity.dataset_2Darr[i][150]); // Labels
 
                     // Train the model using X and Y
+                    boolean isTrained = MainActivity.classifier.isTrained();
                     MainActivity.classifier.train(MainActivity.X, Ml.ROW_SAMPLE, MainActivity.Y);
-
                     isTrained = MainActivity.classifier.isTrained();
+
                     int getType = MainActivity.classifier.getType();
                     Mat getClassWeights = MainActivity.classifier.getClassWeights();
                     TermCriteria getTermCriteria = MainActivity.classifier.getTermCriteria();
 
+                    // ----------------------------
+                    //  -Compute training accuracy:
+                    // ----------------------------
 
-                    // PROTOTYPE:
-                    Mat x = new Mat(new Size(150, 1),CvType.CV_32FC1); // Float
-                    int x_rows = x.rows(); // 1
-                    int x_cols = x.cols(); // 150
-                    for (int i = 0; i < 150; i++) {
-                        x.put(0, i, 0.2f);
+                    // Count successful classifications
+                    int count = 0;
+
+
+                    // Iterate over the examples
+                    for (int i = 0; i < 60; ++i) {
+
+                        // Extract row of X
+                        Mat x = Mat.zeros(1, 150, CvType.CV_32FC1);
+                        for (int j = 0; j < 150; ++j) {
+                            x.put(0, j, MainActivity.X.get(i, j)); // Individual feature vector for ith example
+                        }
+
+                        // Pass in training example and compute prediction
+                        Mat outMat = new Mat();
+                        float p = MainActivity.classifier.predict(x, outMat, 0);
+
+                        // Get actual target value
+                        double[] T = MainActivity.Y.get(i, 0); // Y is 60x1
+                        double t = T[0]; // Grab value
+
+                        // There is a ternary split in the real line for our classification:
+                        // (-infinity)---------(-1)---------(0)---------(+1)---------(+infinity)
+                        //                   Class 1  |   Class 2   |  Class 3
+                        // Activity 1: -infinity < prediction < -0.5
+                        // Activity 2: -0.5 < prediction < +0.5
+                        // Activity 3: +0.5 < prediction < infinity
+                        if ( ( p < -0.5  &&  t < -0.5 ) ||
+                           ( (-0.5 <= p  &&  p < 0.5) && (-0.5 <= t  &&  t < 0.5) ) ||
+                           ( ( 0.5 <= p  &&  0.5 <= t ) ) ) {
+                            count++;
+                        }
+
+
                     }
 
+                    float accuracy = (float)count / 60.0f;
 
-
-
-                    //Mat outMat = new Mat();
-                    //float response = MainActivity.classifier.predict(x, outMat, 0);
-                    float prediction = MainActivity.classifier.predict(x);
-
-
-
-
+                    // End training of model
+                    // End training of model
+                    // End training of model
 
                     cursor.close();
                     database.close();
                     return null;
-
 
             }catch(SQLiteException e){
                     e.printStackTrace();
                     Log.d("ashni, exception","ashni exception here");
                     return false;
                 }
-
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.d("ashni, exception","ashni exception here");
                 return false;
             }
-
         }
-
         //        @Override
         //        protected void onPostExecute(final Boolean success) {
         //            if (success) {
@@ -223,7 +239,5 @@ public  class fetchData extends AppCompatActivity {
         //                Toast.makeText(getApplicationContext(), "Export failed", Toast.LENGTH_SHORT).show();
         //            }
         //        }
-
     }
-
 }

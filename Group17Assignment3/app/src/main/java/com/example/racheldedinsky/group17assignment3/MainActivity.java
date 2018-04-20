@@ -143,9 +143,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         activity = "Walk";
                     } else if (idx == 1) {
                         activity = "Run";
-                    } else if(idx==2) {
-                        activity = "Jump";
                     }
+                    // Turn off jump temporarily
+                    // Turn off jump temporarily
+                    // Turn off jump temporarily
+                    // Turn off jump temporarily
+                    // Turn off jump temporarily
+                    // Turn off jump temporarily
+                    //else if(idx==2) {
+                    //    activity = "Jump";
+                    //}
                     else
                     {
                         empty_string=true;
@@ -206,67 +213,112 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     wait_for_not_clicked.setText("Please wait while collecting data");
                 }
                 break;
-            case R.id.test_button:
+            case R.id.test_button: // Train Button
+
+                // Train the model in the fetchData class in an AsyncTask
                 Toast.makeText(getApplicationContext(), "Training model. Hold on!", Toast.LENGTH_SHORT).show();
                 fetchData fd = new fetchData();
                 fd.executeTask();
-
-
-                int temp0 = 0;
-
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                // JOSH - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-                //testCpp_interop();
-                //testOpenCV_interop();
 
                 break;
 
             case R.id.predict_button:
 
-
                 Toast.makeText(getApplicationContext(), "Predict Pressed", Toast.LENGTH_SHORT).show();
 
+                // -------------------------------------
+                // To-Do:
+                //  -Get new feature vector from user (x in 1x150)
+                // -------------------------------------
 
-                // PROTOTYPE of feature vector:
+                // ----------------------------
+                //  -Compute training accuracy:
+                // ----------------------------
+
+                // Count successful classifications
+                int count = 0;
+
+
+                // Iterate over the examples
+                for (int i = 0; i < 60; ++i) {
+
+                    // Extract row of X
+                    Mat x = Mat.zeros(1, 150, CvType.CV_32FC1);
+                    for (int j = 0; j < 150; ++j) {
+                        x.put(0, j, MainActivity.X.get(i, j)); // Individual feature vector for ith example
+                    }
+
+                    // Pass in training example and compute prediction
+                    Mat outMat = new Mat();
+                    float p = MainActivity.classifier.predict(x, outMat, 0);
+
+                    // Get actual target value
+                    double[] T = MainActivity.Y.get(i, 0); // Y is 60x1
+                    double t = T[0]; // Grab value
+
+                    // There is a ternary split in the real line for our classification:
+                    // (-infinity)---------(-1)---------(0)---------(+1)---------(+infinity)
+                    //                   Class 1  |   Class 2   |  Class 3
+                    // Activity 1: -infinity < prediction < -0.5
+                    // Activity 2: -0.5 < prediction < +0.5
+                    // Activity 3: +0.5 < prediction < infinity
+                    if ( ( p < -0.5  &&  t < -0.5 ) ||
+                            ( (-0.5 <= p  &&  p < 0.5) && (-0.5 <= t  &&  t < 0.5) ) ||
+                            ( ( 0.5 <= p  &&  0.5 <= t ) ) ) {
+                        count++;
+                    }
+
+
+                }
+                float TrainingAccuracy = (float)count / 60.0f;
+
+
+                float debugCount = 0.0f;
+                for (int i = 0; i < 42; ++i) {
+                    float debugVar = TrainingAccuracy * TrainingAccuracy;
+                    debugCount += debugVar;
+                }
+                float finalDebugVal = debugCount / (float)M;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                // --BELOW IS PROTOTYPE CODE TO BE REPLACED BY USER INPUT FEATURE VECTOR-----------
+                // Perform classification on new feature vector
                 Mat x = Mat.zeros(1, N, CvType.CV_32FC1);
                 int x_rows = x.rows(); // 1
                 int x_cols = x.cols(); // 150
-                for (int i = 0; i < 150; i++) {
+                for (int i = 0; i < 150; i++) { // PROTOTYPE of feature vector:
                     x.put(0, i, 0.2f);
                 }
+                // --ABOVE IS PROTOTYPE CODE TO BE REPLACED BY USER INPUT FEATURE VECTOR-----------
 
 
-
-                // Train the model using X and Y
-                classifier.train(X, Ml.ROW_SAMPLE, Y);
-
-
-                Mat getClassWeights = classifier.getClassWeights();
-                TermCriteria getTermCriteria = classifier.getTermCriteria();
-                boolean isTrained = classifier.isTrained();
-
+                // Compute prediction of feature vector
                 Mat outMat = new Mat();
                 float response = classifier.predict(x, outMat, 0);
 
-
-
-                x = new Mat(new Size(1,150),CvType.CV_32SC1); // Integer {-1, 0, +1}
-                int Y_rows = Y.rows(); // 60
-                int Y_cols = Y.cols(); // 1
-
+                // -------------------------------------
+                // To-Do:
+                //  -Display value of prediction result!
+                // -------------------------------------
 
                 break; // end predict_button
         }
     }
     static public void enableButton(boolean train_enable)
     {
-        train_enabled= train_enable;
+        train_enabled = train_enable;
         train_button_var.setClickable(train_enabled);
         train_button_var.setEnabled(train_enable);
     }
