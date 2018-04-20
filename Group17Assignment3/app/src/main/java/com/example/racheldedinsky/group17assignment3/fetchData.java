@@ -123,10 +123,10 @@ public  class fetchData extends AppCompatActivity {
                                 Log.d("val",""+val);
                             }
                             String activity = cursor.getString(151);
-                            if(activity=="Walk"){
+                            if(activity.equals("Walk")){
                                 myValues[i-1][151] = 0;
                             }
-                            else if(activity=="Run"){
+                            else if(activity.equals("Run")){
                                 myValues[i-1][151] =1;
                             }
                             else{
