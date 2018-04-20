@@ -17,11 +17,11 @@ function plotgraph(output){
         var x = output[i][0];
         var y = output[i][1];
         var z = output[i][2];
-        if(i < 4){
+        if(i < 20){
 
 
             colorPoint = 'rgb(128, 0, 128)'
-        } else if(i < 8){
+        } else if(i < 40){
             colorPoint = 'rgb(55, 128, 191)'
         } else {
             colorPoint = 'rgb(219, 64, 82)'
@@ -67,7 +67,7 @@ function createNewPlot(walk, jog, run){
           width: 368
         };
 
-        for (var i = 0; i<12; i++){
+        for (var i = 0; i<60; i++){
 
             console.log(data[i][0]);
 
@@ -75,10 +75,10 @@ function createNewPlot(walk, jog, run){
             var x = data[i][0];
             var y = data[i][1];
             var z = data[i][2];
-            if(i < 4){
+            if(i < 20){
 
                 colorPoint = 'rgb(128, 0, 128)'
-            } else if(i < 5){
+            } else if(i < 40){
                 colorPoint = 'rgb(55, 128, 191)'
             } else {
                 colorPoint = 'rgb(219, 64, 82)'
@@ -100,14 +100,14 @@ function createNewPlot(walk, jog, run){
 
             };
 
-            if( walk && i< 4)
+            if( walk && i< 20)
             {
                charts.push(trace);
             }
-            if( jog && i<8 && i >=4){
+            if( jog && i<40 && i >=20){
                 charts.push(trace);
             }
-            if( run && i<12 && i >=8){
+            if( run && i<60 && i >=40){
                 charts.push(trace);
             }
 
