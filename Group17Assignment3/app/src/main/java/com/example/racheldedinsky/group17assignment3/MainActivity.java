@@ -294,7 +294,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
          *   -1 = jump
          */
         Log.d("KUSHAL","Predicted--- was it..... ?"+p);
-
+        String prediction = "";
+        switch((int) p)
+        {
+            case -1:prediction="JUMP";break;
+            case 1:prediction="RUN";break;
+            case 0:prediction="WALK";break;
+        }
+        executionTime.setText("Predicted== "+prediction);
         // -------------------------------------
         // To-Do:
         //  -Display value of prediction result!
