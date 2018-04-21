@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.opencv.core.CvType;
@@ -17,6 +18,7 @@ import org.opencv.ml.Ml;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Timer;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -27,6 +29,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 public  class fetchData extends AppCompatActivity {
 
     double accuracy =0 ;
+    long executionTime =0 ;
     Context c = null;
     public static float myValues[][];
     fetchData(Context con){
@@ -112,9 +115,10 @@ public  class fetchData extends AppCompatActivity {
         protected Boolean doInBackground(String... strings) {
 
             try {
+                long startTime = System.currentTimeMillis();
 
                 SQLiteDatabase database = SQLiteDatabase.openDatabase(Environment.getExternalStorageDirectory().getPath() + "/CSE535_ASSIGNMENT3/activityDB.db", null, 0);
-                Log.d("no exception", "no exception");
+                //Log.d("no exception", "no exception");
                 String query = "Select * from TEST";
                 try{
                     Cursor cursor = database.rawQuery(query,null);
@@ -144,8 +148,8 @@ public  class fetchData extends AppCompatActivity {
                         }
                     }
                     MainActivity.dataset_2Darr = myValues;
-                    Log.d("main actvity array",MainActivity.dataset_2Darr[0][0]+"");
-                    Log.d("float array",myValues[0][0]+"");
+                   // Log.d("main actvity array",MainActivity.dataset_2Darr[0][0]+"");
+                   // Log.d("float array",myValues[0][0]+"");
 
                     // JOSH - - - - - - - - - - - - Inside the fetchData Async Task
                     // JOSH - - - - - - - - - - - - Inside the fetchData Async Task
@@ -180,7 +184,7 @@ public  class fetchData extends AppCompatActivity {
 
                     isTrained = MainActivity.classifier.isTrained();
                     //train only if it is not already trained
-                    Log.d("KUSHAL","Is model trained?: "+isTrained);
+                   // Log.d("KUSHAL","Is model trained?: "+isTrained);
                     if(!isTrained)
                         MainActivity.classifier.train(MainActivity.X, Ml.ROW_SAMPLE, MainActivity.Y);
                     else
@@ -245,7 +249,7 @@ public  class fetchData extends AppCompatActivity {
                         // Activity 1: -infinity < prediction < -0.5
                         // Activity 2: -0.5 < prediction < +0.5
                         // Activity 3: +0.5 < prediction < infinity
-                        Log.d("KUSHAL","Act Label==="+T[0]+" Prediction Label = "+p);
+                        //Log.d("KUSHAL","Act Label==="+T[0]+" Prediction Label = "+p);
                         if ( ( p < -0.5  &&  t < -0.5 ) ||
                            ( (-0.5 <= p  &&  p < 0.5) && (-0.5 <= t  &&  t < 0.5) ) ||
                            ( ( 0.5 <= p  &&  0.5 <= t ) ) ) {
@@ -255,7 +259,9 @@ public  class fetchData extends AppCompatActivity {
                     }
 
                     accuracy = (float)count / 6.0f;
+                    long endTime = System.currentTimeMillis();
                     Log.d("KUSHAL","Training Accuracy = "+accuracy);
+                    executionTime = endTime - startTime;
                     // End training of model
                     // End training of model
                     // End training of model
@@ -278,7 +284,9 @@ public  class fetchData extends AppCompatActivity {
                 @Override
                 protected void onPostExecute(final Boolean success) {
                     if (success) {
-                        Toast.makeText(c, "Test Accuracy = "+(accuracy*100), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(c, "Accuracy = "+(accuracy*100), Toast.LENGTH_SHORT).show();
+
+                        MainActivity.executionTime.setText(String.valueOf(executionTime)+" ms");
                     }
                 }
     }

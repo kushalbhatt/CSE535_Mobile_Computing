@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static Mat Y;// = Mat.zeros(M, 1, CvType.CV_32SC1);   // Integer {-1, 0, +1}
     public static Mat X;// = Mat.zeros(M, N, CvType.CV_32FC1); // Float
     public static float[][] dataset_2Darr;
-
+    static TextView executionTime;
     private static final String TAG = "mytag";
     static {
         if(OpenCVLoader.initDebug()) {
@@ -124,6 +124,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         X = Mat.zeros(M, N, CvType.CV_32FC1);
         int X_rows = X.rows(); // 60
         int X_cols = X.cols(); // 150
+
+        executionTime = findViewById(R.id.execTime);
     }
     @Override
     protected void onDestroy() {
