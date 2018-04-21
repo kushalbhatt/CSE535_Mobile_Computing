@@ -7,6 +7,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -31,6 +32,8 @@ public class SensorListener  extends Service implements SensorEventListener {
     private String current_activity = "";
     public static String LOG_TAG = "SensorListener";
     private int counter=0;
+    //if testing sample then no need to save it to database
+    private int IS_TESTING = 0;
     ArrayList<Float[]> al = new ArrayList<Float[]>();
 
     @Override
@@ -53,12 +56,22 @@ public class SensorListener  extends Service implements SensorEventListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("RACHEL","onStartCommand() called");
-        current_activity = intent.getStringExtra("table_name");
-        Toast.makeText(this,"Service Started"+ current_activity,Toast.LENGTH_LONG);
-        counter=0;
-        al.clear();
-        startListner();
+        Bundle b = intent.getExtras();
+        //training data collection
+        Log.d("RACHEL","onStartCommand() called  Extras? = "+b);
+        if(b==null) {
+            IS_TESTING = 0;
+            current_activity = intent.getStringExtra("table_name");
+            Toast.makeText(this, "Service Started" + current_activity, Toast.LENGTH_LONG);
+        }
+        //test data collection
+        else {
+            IS_TESTING = b.getInt("is_testing");
+        }
+            counter = 0;
+            al.clear();
+            startListner();
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -82,7 +95,15 @@ public class SensorListener  extends Service implements SensorEventListener {
         {
             stopListener();
             MainActivity.enableButton(true);
-            sendToDatabase(dbActivityId,al,dbActivityLabel);
+            //For training data save it to database
+            Log.d("KUSHAL","Is_TESTING? "+IS_TESTING);
+            if(IS_TESTING==0) {
+                sendToDatabase(dbActivityId, al, dbActivityLabel);
+            }
+            //testing data nop need to save to db ;  Just send it to mainactivity for prediction
+            else{
+                MainActivity.predictUserActivity(al);
+            }
             al.clear();
             dbActivityId="";
             activityData="";

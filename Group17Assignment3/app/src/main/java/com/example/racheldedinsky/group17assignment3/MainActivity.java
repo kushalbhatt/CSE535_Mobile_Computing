@@ -1,5 +1,7 @@
 package com.example.racheldedinsky.group17assignment3;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,6 +21,7 @@ import org.opencv.core.TermCriteria;
 import org.opencv.ml.Ml;
 import org.opencv.ml.SVM;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 
@@ -77,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // Instantiate SVM object globally
     static SVM classifier = SVM.create();
 
-
     static {
         System.loadLibrary("native-lib");
         System.loadLibrary("opencv_java3");
@@ -104,14 +106,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Initialize the app view
         initView();
 
-        // SVM Stuff:
-        classifier.setKernel(SVM.CHI2);
+        // SVM Parameters:
+        classifier.setKernel(SVM.RBF);
         classifier.setType(SVM.C_SVC);
-        classifier.setGamma(0.5);
-        classifier.setNu(0.5);
-        classifier.setC(3);
+        classifier.setGamma(0.0066);
+        //classifier.setNu(0.5);
+        classifier.setC(25);
         //classifier.setTermCriteria(criteria);
-
+         TextView kernel = findViewById(R.id.kernel);
+        TextView gama = findViewById(R.id.gamma);
+        kernel.setText("SVM Parameters:: Kernel = RBF");
+        gama.setText("Gamma = 0.066  C = 25");
         // Dataset stuff:
         //Y = new Mat(new Size(1,M),CvType.CV_32SC1); // Integer {-1, 0, +1}
         Y = Mat.zeros(M, 1, CvType.CV_32SC1);
@@ -122,7 +127,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         X = Mat.zeros(M, N, CvType.CV_32FC1);
         int X_rows = X.rows(); // 60
         int X_cols = X.cols(); // 150
-
     }
     @Override
     protected void onDestroy() {
@@ -131,6 +135,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dbHandler.close();
         super.onDestroy();
     }
+
     public void onClick(View view)
     {
         //switch statement based on which button
@@ -152,15 +157,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     } else if (idx == 1) {
                         activity = "Run";
                     }
-                    // Turn off jump temporarily
-                    // Turn off jump temporarily
-                    // Turn off jump temporarily
-                    // Turn off jump temporarily
-                    // Turn off jump temporarily
-                    // Turn off jump temporarily
-                    //else if(idx==2) {
-                    //    activity = "Jump";
-                    //}
+                    else if(idx==2) {
+                        activity = "Jump";
+                    }
                     else
                     {
                         empty_string=true;
@@ -189,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 progressBar_jump_var.setProgress(trainJumpCount);
                                 activity_id = "j"+trainJumpCount;
                             }
-                            else//catch all statement, should never run
+                            else //catch all statement, should never run
                             {
                                 Toast.makeText(getApplicationContext(), "Invalid data.", Toast.LENGTH_SHORT).show();
                             }
@@ -225,105 +224,84 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 // Train the model in the fetchData class in an AsyncTask
                 Toast.makeText(getApplicationContext(), "Training model. Hold on!", Toast.LENGTH_SHORT).show();
-                fetchData fd = new fetchData();
+                fetchData fd = new fetchData(getApplicationContext());
                 fd.executeTask();
 
                 break;
 
             case R.id.predict_button:
-
-                Toast.makeText(getApplicationContext(), "Predict Pressed", Toast.LENGTH_SHORT).show();
+                /*****
+                 * ---Kushal-----
+                 * For online - real time prediction....
+                 * Ask user to give the activity!  And we will use our trained SVM to predict it.
+                 *
+                 */
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("Online Activity Prediction!\n Press ok and do one of the activities: Walk / Run / Jump\n" +
+                        "The app will predict what are you doing!  Ready?")
+                        .setCancelable(false)
+                        .setPositiveButton("Record and Predict Activity!", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                //do things
+                                Intent sensorService = new Intent(MainActivity.this,SensorListener.class);
+                                //Use Bundle if any data needs to be passed along with this intent
+                                sensorService.putExtra("is_testing",1);
+                                startService(sensorService);
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
 
                 // -------------------------------------
                 // To-Do:
                 //  -Get new feature vector from user (x in 1x150)
                 // -------------------------------------
 
-                // ----------------------------
-                //  -Compute training accuracy:
-                // ----------------------------
-
-                // Count successful classifications
-                int count = 0;
-
-
-                // Iterate over the examples
-                for (int i = 0; i < 60; ++i) {
-
-                    // Extract row of X
-                    Mat x = Mat.zeros(1, 150, CvType.CV_32FC1);
-                    for (int j = 0; j < 150; ++j) {
-                        x.put(0, j, MainActivity.X.get(i, j)); // Individual feature vector for ith example
-                    }
-
-                    // Pass in training example and compute prediction
-                    Mat outMat = new Mat();
-                    float p = MainActivity.classifier.predict(x, outMat, 0);
-
-                    // Get actual target value
-                    double[] T = MainActivity.Y.get(i, 0); // Y is 60x1
-                    double t = T[0]; // Grab value
-
-                    // There is a ternary split in the real line for our classification:
-                    // (-infinity)---------(-1)---------(0)---------(+1)---------(+infinity)
-                    //                   Class 1  |   Class 2   |  Class 3
-                    // Activity 1: -infinity < prediction < -0.5
-                    // Activity 2: -0.5 < prediction < +0.5
-                    // Activity 3: +0.5 < prediction < infinity
-                    if ( ( p < -0.5  &&  t < -0.5 ) ||
-                            ( (-0.5 <= p  &&  p < 0.5) && (-0.5 <= t  &&  t < 0.5) ) ||
-                            ( ( 0.5 <= p  &&  0.5 <= t ) ) ) {
-                        count++;
-                    }
-
-
-                }
-                float TrainingAccuracy = (float)count / 60.0f;
-
-
-                float debugCount = 0.0f;
-                for (int i = 0; i < 42; ++i) {
-                    float debugVar = TrainingAccuracy * TrainingAccuracy;
-                    debugCount += debugVar;
-                }
-                //float finalDebugVal = debugCount / (float)M;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                // --BELOW IS PROTOTYPE CODE TO BE REPLACED BY USER INPUT FEATURE VECTOR-----------
-                // Perform classification on new feature vector
-                Mat x = Mat.zeros(1, N, CvType.CV_32FC1);
-                int x_rows = x.rows(); // 1
-                int x_cols = x.cols(); // 150
-                for (int i = 0; i < 150; i++) { // PROTOTYPE of feature vector:
-                    x.put(0, i, 0.2f);
-                }
-                // --ABOVE IS PROTOTYPE CODE TO BE REPLACED BY USER INPUT FEATURE VECTOR-----------
-
-
-                // Compute prediction of feature vector
-                Mat outMat = new Mat();
-                float response = classifier.predict(x, outMat, 0);
-
-                // -------------------------------------
-                // To-Do:
-                //  -Display value of prediction result!
-                // -------------------------------------
 
                 break; // end predict_button
         }
     }
+
+    //Each entry the arraylist is [x,y,z]  sensor values  total: 50 = 150 values
+    public static void predictUserActivity(ArrayList<Float[]> data)
+    {
+        Log.d("KUSHAL","predictUserActivity Called!  Array size = "+data.size());
+
+
+        // --BELOW IS PROTOTYPE CODE TO BE REPLACED BY USER INPUT FEATURE VECTOR-----------
+        // Perform classification on new feature vector
+        Mat x = Mat.zeros(1, N, CvType.CV_32FC1);
+        int x_rows = x.rows(); // 1
+        int x_cols = x.cols(); // 150
+
+
+        for (int i = 0; i < 50; i++) { // PROTOTYPE of feature vector:
+            Float[] vals= data.get(i);
+            x.put(0, 3*i, vals[0]);//x
+            x.put(0, 3*i+1, vals[1]);//y
+            x.put(0, 3*i+2, vals[2]);//z
+        }
+        // --ABOVE IS PROTOTYPE CODE TO BE REPLACED BY USER INPUT FEATURE VECTOR-----------
+
+
+        // Compute prediction of feature vector
+        Mat outMat = new Mat();
+        float response = classifier.predict(x, outMat, 0);
+        double predictions[] = outMat.get(0,0);
+        double p = predictions[0];
+        /***
+         *   0 = walk
+         *   1 = run
+         *   -1 = jump
+         */
+        Log.d("KUSHAL","Predicted--- was it..... ?"+p);
+
+        // -------------------------------------
+        // To-Do:
+        //  -Display value of prediction result!
+        // -------------------------------------
+    }
+
     static public void enableButton(boolean train_enable)
     {
         train_enabled = train_enable;
@@ -490,4 +468,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         return 0.0f;//(float)count / (float)M;
     }
+
+
 }
