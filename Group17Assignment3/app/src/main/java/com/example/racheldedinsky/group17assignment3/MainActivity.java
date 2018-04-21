@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
          TextView kernel = findViewById(R.id.kernel);
         TextView gama = findViewById(R.id.gamma);
         kernel.setText("SVM Parameters:: Kernel = RBF");
-        gama.setText("Gamma = 0.066  C = 25");
+        gama.setText("Gamma = 0.0066  C = 25");
         // Dataset stuff:
         //Y = new Mat(new Size(1,M),CvType.CV_32SC1); // Integer {-1, 0, +1}
         Y = Mat.zeros(M, 1, CvType.CV_32SC1);
