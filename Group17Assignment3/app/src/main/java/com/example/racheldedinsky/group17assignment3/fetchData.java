@@ -12,7 +12,6 @@ import android.widget.Toast;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
 import org.opencv.ml.Ml;
 

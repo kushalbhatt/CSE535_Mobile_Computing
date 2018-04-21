@@ -3,26 +3,23 @@ package com.example.racheldedinsky.group17assignment3;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
-import android.widget.RadioGroup;
-import android.widget.Toast;
-import android.widget.TextView;
 import android.widget.ProgressBar;
+import android.widget.RadioGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.core.TermCriteria;
 import org.opencv.ml.Ml;
 import org.opencv.ml.SVM;
 
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 
 

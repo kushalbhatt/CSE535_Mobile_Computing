@@ -1,7 +1,5 @@
 package com.example.racheldedinsky.group17assignment3;
 
-import java.util.ArrayList;
-
 /**
  * Created by RachelDedinsky on 3/28/18.
  */
